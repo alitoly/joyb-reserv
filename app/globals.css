@@ -1,26 +1,109 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/*
+  JoyB Resort — design tokens.
+  Palette is the committed brand identity (logo colors). Light theme only.
+  Warmth is carried by accents + imagery, not by a muddy background.
+*/
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Brand */
+  --color-gold: #f2a900;
+  --color-gold-strong: #d99400;
+  --color-green: #3f6f35;
+  --color-green-strong: #335a2b;
+  --color-rust: #b13a1f;
+  --color-rust-strong: #94301a;
+  --color-charcoal: #1d2020;
+
+  /* Surfaces & ink */
+  --color-sand: #f8f5ef; /* page background */
+  --color-surface: #ffffff; /* cards, panels */
+  --color-sand-deep: #efe9dd; /* alt sections, hairlines */
+  --color-ink: #1d2020; /* body text — 4.5:1+ on sand */
+  --color-ink-soft: #4a4f48; /* muted text, still ≥4.5:1 on sand */
+
+  --color-background: var(--color-sand);
+  --color-foreground: var(--color-ink);
+
+  --font-display: var(--font-marcellus);
+  --font-sans: var(--font-mulish);
+
+  /* Semantic z-index scale */
+  --z-sticky: 30;
+  --z-header: 40;
+  --z-overlay: 50;
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-sand);
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Headings lean on the display family with balanced wrapping */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display), Georgia, serif;
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* Accessible, visible focus ring everywhere */
+:focus-visible {
+  outline: 2px solid var(--color-green);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Scroll-reveal: content is visible by default, motion only enhances it */
+.reveal {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.7s var(--ease-out-quint),
+      transform 0.7s var(--ease-out-quint);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .reveal[data-visible="true"] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Slow ambient zoom for hero imagery */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes kenburns {
+    from {
+      transform: scale(1.05);
+    }
+    to {
+      transform: scale(1.14);
+    }
+  }
+  .animate-kenburns {
+    animation: kenburns 18s var(--ease-out-quint) forwards;
+  }
 }
