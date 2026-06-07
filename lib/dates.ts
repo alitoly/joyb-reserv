@@ -25,8 +25,16 @@ export function nightsBetween(checkIn: string, checkOut: string): number {
 /** True when `iso` is a valid YYYY-MM-DD calendar date. */
 export function isValidISODate(iso: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return false;
-  const d = new Date(`${iso}T00:00:00`);
-  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === iso;
+  const [y, m, d] = iso.split("-").map(Number);
+  // Validate against UTC so the check never depends on the server's timezone
+  // (a local-midnight Date round-tripped through toISOString() shifts the day
+  // in any non-UTC zone and would wrongly reject valid dates).
+  const date = new Date(Date.UTC(y, m - 1, d));
+  return (
+    date.getUTCFullYear() === y &&
+    date.getUTCMonth() === m - 1 &&
+    date.getUTCDate() === d
+  );
 }
 
 /** Human-friendly format, e.g. "Mon, 12 Aug 2026". */
