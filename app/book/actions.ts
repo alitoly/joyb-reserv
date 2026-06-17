@@ -1,10 +1,10 @@
 "use server";
 
-import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
-import { findFreeRoomId } from "@/lib/bookings";
+import { getServerSupabase, isSupabaseConfigured } from "@/lib/supabase-server";
+import { isRoomAvailable } from "@/lib/bookings";
+import { getRoom } from "@/lib/rooms-data";
 import { isValidISODate, nightsBetween, todayISO } from "@/lib/dates";
-import { getRoom } from "@/lib/rooms";
-import type { RoomTypeSlug } from "@/lib/types";
+import { NEW_RESERVATION_SOURCE, NEW_RESERVATION_STATUS } from "@/lib/types";
 
 export interface BookingSuccess {
   status: "success";
@@ -21,10 +21,7 @@ export interface BookingError {
   fieldErrors?: Record<string, string>;
 }
 
-export type BookingState =
-  | { status: "idle" }
-  | BookingSuccess
-  | BookingError;
+export type BookingState = { status: "idle" } | BookingSuccess | BookingError;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -33,12 +30,12 @@ function str(formData: FormData, key: string): string {
 }
 
 /**
- * Create a website booking.
+ * Create a website reservation for a specific room.
  *
- * The whole flow is server-authoritative: we re-validate every field, re-run
- * the availability check against Supabase, pick a free physical room, and let
- * the database exclusion constraint be the final guard against a race. The
- * client's earlier "available" message is never trusted here.
+ * Server-authoritative: re-validate every field, re-run the per-room
+ * availability check against the live DB, then insert into `reservations`
+ * stamped `source = website`. A Postgres `23P01` (exclusion_violation) — if the
+ * DB has a double-booking guard — is treated as "just taken".
  */
 export async function createBooking(
   _prev: BookingState,
@@ -48,11 +45,11 @@ export async function createBooking(
     return {
       status: "error",
       message:
-        "Bookings aren't connected yet. Add your Supabase keys to .env.local to enable live reservations.",
+        "Bookings aren't connected yet. Add the Supabase server keys to .env.local to enable live reservations.",
     };
   }
 
-  const roomSlug = str(formData, "room") as RoomTypeSlug;
+  const roomId = str(formData, "room");
   const checkIn = str(formData, "checkIn");
   const checkOut = str(formData, "checkOut");
   const guestName = str(formData, "guestName");
@@ -61,7 +58,7 @@ export async function createBooking(
   const message = str(formData, "message");
 
   const fieldErrors: Record<string, string> = {};
-  const room = getRoom(roomSlug);
+  const room = await getRoom(roomId);
 
   if (!room) fieldErrors.room = "Please choose a room.";
   if (!guestName) fieldErrors.guestName = "Please tell us your name.";
@@ -80,7 +77,7 @@ export async function createBooking(
       fieldErrors.checkOut = "Check-out must be after check-in.";
   }
 
-  if (Object.keys(fieldErrors).length > 0) {
+  if (Object.keys(fieldErrors).length > 0 || !room) {
     return {
       status: "error",
       message: "Please fix the highlighted fields.",
@@ -88,35 +85,38 @@ export async function createBooking(
     };
   }
 
-  // Re-check availability and reserve a specific room.
-  const free = await findFreeRoomId(roomSlug, checkIn, checkOut);
-  if (!free) {
+  // Re-check availability for this exact room right before writing.
+  const avail = await isRoomAvailable(roomId, checkIn, checkOut);
+  if (!avail.available) {
     return {
       status: "error",
       message:
         "Those dates were just taken for this room. Please try different dates.",
-      fieldErrors: { checkOut: "No room of this type is free for these dates." },
+      fieldErrors: { checkOut: "This room isn't free for these dates." },
     };
   }
 
-  const supabase = getSupabase();
+  const supabase = getServerSupabase();
   if (!supabase) {
     return { status: "error", message: "Booking service is unavailable." };
   }
 
+  const nights = nightsBetween(checkIn, checkOut);
+  const totalAmount = Number((room.priceUsd * nights).toFixed(2));
+
   const { data, error } = await supabase
-    .from("bookings")
+    .from("reservations")
     .insert({
-      room_id: free.roomId,
-      room_type_id: free.roomTypeId,
-      guest_name: guestName,
-      guest_email: guestEmail,
-      guest_phone: guestPhone,
-      check_in: checkIn,
-      check_out: checkOut,
-      status: "pending",
-      source: "website",
-      message: message || null,
+      room_id: Number(roomId),
+      tenant_name: guestName,
+      tenant_email: guestEmail,
+      tenant_phone: guestPhone,
+      check_in_date: checkIn,
+      check_out_date: checkOut,
+      status: NEW_RESERVATION_STATUS,
+      source: NEW_RESERVATION_SOURCE,
+      total_amount: totalAmount,
+      notes: message || null,
     })
     .select("id")
     .single();
@@ -128,24 +128,23 @@ export async function createBooking(
         status: "error",
         message:
           "Those dates were just taken for this room. Please try different dates.",
-        fieldErrors: {
-          checkOut: "No room of this type is free for these dates.",
-        },
+        fieldErrors: { checkOut: "This room isn't free for these dates." },
       };
     }
+    console.error("reservation insert failed:", error.message);
     return {
       status: "error",
       message: "Something went wrong saving your booking. Please try again.",
     };
   }
 
-  const reference = String(data.id).slice(0, 8).toUpperCase();
+  const reference = `JB${String(data.id).padStart(5, "0")}`;
   return {
     status: "success",
     reference,
-    roomName: room?.name ?? "Your room",
+    roomName: room.name,
     checkIn,
     checkOut,
-    nights: nightsBetween(checkIn, checkOut),
+    nights,
   };
 }

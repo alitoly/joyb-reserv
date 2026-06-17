@@ -1,85 +1,49 @@
-import type { RoomTypeSlug } from "./types";
-
 /**
- * Static presentation content for the three room types.
+ * Static presentation content the live database doesn't carry — facilities,
+ * bed-size reference, and fallback imagery.
  *
- * This lets the marketing pages render fully even before Supabase is wired up.
- * The `slug` and `capacity` here MUST match the seeded rows in
- * `supabase-schema.sql`; availability/booking is resolved against Supabase by
- * slug. Swap the imagery later by replacing `image`.
+ * Room inventory, prices, capacity, images and availability all come from
+ * Supabase now: see `lib/rooms-data.ts` (listing) and `lib/bookings.ts`
+ * (availability). This module is presentation-only.
  */
-export interface RoomContent {
-  slug: RoomTypeSlug;
-  name: string;
-  shortName: string;
-  tagline: string;
-  description: string;
-  beds: string;
-  capacity: number;
-  /** Indicative nightly rate in USD; the resort can refine in Supabase. */
-  priceFrom: number;
-  amenities: string[];
-  image: string;
-  imageAlt: string;
-}
 
 const unsplash = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-export const ROOMS: RoomContent[] = [
-  {
-    slug: "garden-single",
-    name: "Garden Single Room",
-    shortName: "Garden Single",
-    tagline: "One bed · private bathroom",
-    description:
-      "A calm room for solo travellers, opening onto the palm garden. One comfortable bed, a private en-suite bathroom, and the sound of the sea a short walk away.",
-    beds: "1 single bed",
-    capacity: 1,
-    priceFrom: 85,
-    amenities: ["Private bathroom", "Garden view", "Air conditioning", "Free Wi-Fi"],
-    image: unsplash("photo-1566073771259-6a8506099945"),
-    imageAlt:
-      "Sunlit single hotel room with crisp white linen and a private en-suite door",
-  },
-  {
-    slug: "ocean-twin",
-    name: "Ocean Twin Room",
-    shortName: "Ocean Twin",
-    tagline: "Two beds · private bathroom",
-    description:
-      "Made for friends and small families. Two beds, a private bathroom, and a breezy balcony that catches the Indian Ocean light through the morning.",
-    beds: "2 twin beds",
-    capacity: 2,
-    priceFrom: 120,
-    amenities: ["Private bathroom", "Ocean glimpse", "Balcony", "Air conditioning", "Free Wi-Fi"],
-    image: unsplash("photo-1582719478250-c89cae4dc85b"),
-    imageAlt:
-      "Bright twin-bed room with two neatly made beds and a balcony overlooking greenery",
-  },
-  {
-    slug: "master-suite",
-    name: "Master Suite",
-    shortName: "Master Suite",
-    tagline: "One double bed · private bathroom",
-    description:
-      "Our signature room. A generous double bed, a spacious en-suite bathroom, and the best views on the property. The place to settle in for a slow Zanzibar week.",
-    beds: "1 double bed",
-    capacity: 2,
-    priceFrom: 195,
-    amenities: [
-      "Private bathroom",
-      "Panoramic ocean view",
-      "Lounge corner",
-      "Air conditioning",
-      "Free Wi-Fi",
-    ],
-    image: unsplash("photo-1611892440504-42a792e24d32"),
-    imageAlt:
-      "Spacious master suite with a large double bed framed by soft natural light",
-  },
-];
+/** Shown when a room has no `image_path` in the database. */
+export const FALLBACK_ROOM_IMAGE = unsplash("photo-1611892440504-42a792e24d32");
+export const ROOM_IMAGE_ALT = "A bright, restful room at JoyB Resort";
 
-export function getRoom(slug: string): RoomContent | undefined {
-  return ROOMS.find((r) => r.slug === slug);
-}
+/** Full facility names for prose / detail sections. */
+export const FACILITIES = [
+  "AC / Fan",
+  "WiFi",
+  "Towels",
+  "Basic toiletries",
+  "Fridge",
+  "Kettle",
+] as const;
+
+/** Short facility labels for room cards and chips. */
+export const FACILITY_LABELS = [
+  "AC / Fan",
+  "WiFi",
+  "Towels",
+  "Toiletries",
+  "Fridge",
+  "Kettle",
+] as const;
+
+/** One sentence describing what every room includes. */
+export const FACILITIES_SENTENCE =
+  "Each room includes AC or fan, WiFi, towels, basic toiletries, a fridge, and a kettle.";
+
+export const BED_SIZES = [
+  { label: "Single bed", size: "3.5 ft x 6 ft" },
+  { label: "Twin bed", size: "5 ft x 6.5 ft" },
+  { label: "Deluxe single bed", size: "3.5 ft x 6.5 ft" },
+  { label: "Double bed", size: "6 ft x 6 ft" },
+] as const;
+
+export const BED_SIZES_SENTENCE =
+  "Bed sizes vary by room type. Single beds are 3.5 ft x 6 ft, twin beds are 5 ft x 6.5 ft, deluxe single beds are 3.5 ft x 6.5 ft, and double beds are 6 ft x 6 ft.";

@@ -1,9 +1,11 @@
 import Image from "next/image";
-import { ROOMS } from "@/lib/rooms";
+import { listRooms } from "@/lib/rooms-data";
 import { RoomCard } from "@/components/room-card";
 import { Reveal } from "@/components/reveal";
 import { ButtonLink, Kicker, Section } from "@/components/ui";
 import { WaveIcon, BedIcon, CalendarIcon } from "@/components/icons";
+
+export const revalidate = 300;
 
 const heroImg =
   "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=2000&q=80";
@@ -19,7 +21,7 @@ const FEATURES = [
   {
     icon: BedIcon,
     title: "Rooms made for rest",
-    body: "Three room types, each with a private bathroom, cool air conditioning, and linen kept crisp. Designed for calm, not clutter.",
+    body: "17 rooms across four room types, each with a private bathroom, AC or fan, and linen kept crisp. Designed for calm, not clutter.",
   },
   {
     icon: CalendarIcon,
@@ -28,7 +30,8 @@ const FEATURES = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const featured = (await listRooms()).slice(0, 4);
   return (
     <>
       {/* Hero */}
@@ -130,27 +133,29 @@ export default function HomePage() {
       </Section>
 
       {/* Rooms preview */}
-      <Section className="py-20 sm:py-28">
-        <Reveal className="flex flex-wrap items-end justify-between gap-4">
-          <div className="max-w-2xl">
-            <Kicker>Where you’ll stay</Kicker>
-            <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-tight text-charcoal">
-              Three rooms, one unforgettable view
-            </h2>
-          </div>
-          <ButtonLink href="/rooms" variant="outline">
-            All rooms &amp; rates
-          </ButtonLink>
-        </Reveal>
+      {featured.length > 0 && (
+        <Section className="py-20 sm:py-28">
+          <Reveal className="flex flex-wrap items-end justify-between gap-4">
+            <div className="max-w-2xl">
+              <Kicker>Where you’ll stay</Kicker>
+              <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-tight text-charcoal">
+                Rooms made for the view
+              </h2>
+            </div>
+            <ButtonLink href="/rooms" variant="outline">
+              All rooms &amp; rates
+            </ButtonLink>
+          </Reveal>
 
-        <div className="mt-12 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-          {ROOMS.map((room, i) => (
-            <Reveal as="div" key={room.slug} delay={i * 90} className="h-full">
-              <RoomCard room={room} priority={i === 0} />
-            </Reveal>
-          ))}
-        </div>
-      </Section>
+          <div className="mt-12 grid gap-7 md:grid-cols-2 lg:grid-cols-4">
+            {featured.map((room, i) => (
+              <Reveal as="div" key={room.id} delay={i * 90} className="h-full">
+                <RoomCard room={room} priority={i === 0} />
+              </Reveal>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* Closing CTA */}
       <Section className="pb-8">

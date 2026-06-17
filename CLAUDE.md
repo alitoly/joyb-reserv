@@ -32,39 +32,45 @@ stay in sync with the resort's separate front-desk reservation system.
 
 ## Architecture
 
-**Booking is server-authoritative and race-safe — this is the core invariant.**
-The client is never trusted for availability. The flow:
+The site reads its room catalogue and availability from the resort's **live
+reservation database** (Supabase project `phohqwreweaucsvsnodd`) — the same DB the
+front desk uses — and writes new website bookings back into it. Rooms are looped
+dynamically per-room (not hardcoded, not grouped by type).
 
-1. `lib/bookings.ts` holds all availability logic (server-only, plain functions).
-   Availability is resolved against **physical `rooms`**, not room types: a type
-   is available only while at least one active room of that type has no blocking
-   booking overlapping the range. It reads **all** blocking bookings regardless of
-   `source`, so front-desk bookings block the website.
-2. The overlap rule is `existing.check_in < new.check_out AND existing.check_out > new.check_in`,
-   counting only `pending` + `confirmed` (see `BLOCKING_STATUSES` in `lib/types.ts`).
-   `check_out` is exclusive.
-3. `/api/availability` (Route Handler) exposes read-only availability + upcoming
-   booked ranges to the client form for live feedback.
-4. `app/book/actions.ts` (`"use server"`) re-validates every field, re-runs the
-   availability check, picks a free physical room, and inserts a `pending`/`website`
-   booking. It treats a Postgres `23P01` (exclusion_violation) as "just taken".
-5. `supabase-schema.sql` defines a `btree_gist` **exclusion constraint** on
-   `(room_id, daterange)` for active bookings — the final guard that makes
-   simultaneous double-booking physically impossible even if the app checks pass.
+**Booking is server-authoritative — the client is never trusted for availability.**
 
-**Supabase access** (`lib/supabase.ts`): only `NEXT_PUBLIC_SUPABASE_URL` +
-`NEXT_PUBLIC_SUPABASE_ANON_KEY` are used (same client server- and browser-side).
-Security is enforced by **RLS policies** in `supabase-schema.sql`: public can read
-all three tables and insert only `pending`/`website` bookings; no public
-update/delete. The reception/local system writes with the `service_role` key
-(server-side, bypasses RLS) using `source = 'reception' | 'local_system'`.
-When env vars are absent, `getSupabase()` returns `null` and everything degrades
-gracefully — marketing pages render, the booking form shows an "not connected" notice.
+1. **DB access is server-only** (`lib/supabase-server.ts`): the `service_role` key
+   (env `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`, **no `NEXT_PUBLIC_`**) behind an
+   `import "server-only"` guard. It bypasses RLS, so it must never reach the browser;
+   all Supabase calls happen in Server Components / Route Handlers / Server Actions and
+   select non-PII columns. When env vars are absent, helpers return `null`/`[]` and the
+   app degrades gracefully.
+2. **Room listing** (`lib/rooms-data.ts`): `listRooms()` / `getRoom(id)` join
+   `rooms → room_types(name), pax(value), room_images(image_path)` into the
+   `RoomListing` view-model. `day_payment` is the nightly price; `pax.value` is
+   capacity; the first `room_images` row resolves to a Storage public URL.
+3. **Availability** (`lib/bookings.ts`): per-room. A room is unavailable when a
+   blocking `reservations` row overlaps `[checkIn, checkOut)` (overlap rule
+   `existing.check_in_date < new.check_out AND existing.check_out_date > new.check_in`),
+   or — when `CONSIDER_TENANT_OCCUPANCY` — a long-term `tenants` occupancy overlaps.
+   Reads all reservations regardless of `source`, so front-desk bookings block the site.
+4. **Status rules are centralised in `lib/types.ts`** (`HIDDEN_ROOM_STATUSES`,
+   `NON_BLOCKING_RESERVATION_STATUSES`, `NON_BLOCKING_TENANT_STATUSES`,
+   `NEW_RESERVATION_STATUS`/`SOURCE`). They are lenient for display and conservative for
+   availability; **confirm the real status strings with the reception-system developer**
+   and adjust them in that one place.
+5. `app/book/actions.ts` (`"use server"`) re-validates every field, re-checks
+   `isRoomAvailable`, computes `total_amount = day_payment × nights`, and inserts into
+   `reservations` with `source = 'website'`. It treats a Postgres `23P01`
+   (exclusion_violation) as "just taken" — relevant only if the DB has a double-booking
+   exclusion constraint (confirm; add one if missing).
 
-**Room data lives in two places that must stay aligned**: `lib/rooms.ts` holds the
-static presentation content (names, copy, images, prices) so marketing pages render
-without a database; `supabase-schema.sql` seeds the matching `room_types` (by `slug`)
-and sample `rooms`. When changing rooms, edit both — the `slug` is the join key.
+**Prerequisite:** the `service_role` role needs `GRANT SELECT` on `rooms, room_types,
+pax, room_images, reservations, tenants` and `GRANT INSERT` on `reservations` — until
+then every query returns `permission denied` and the site shows its graceful empty/not-
+connected states. `next.config.ts` allows `*.supabase.co/storage/v1/object/public/**`
+for room images. `lib/rooms.ts` is now **presentation-only** (facilities, bed sizes,
+fallback image) — it no longer defines inventory.
 
 ## Design system
 

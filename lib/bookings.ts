@@ -1,87 +1,70 @@
-import { getSupabase, isSupabaseConfigured } from "./supabase";
+import { getServerSupabase, isSupabaseConfigured } from "./supabase-server";
 import {
-  BLOCKING_STATUSES,
+  CONSIDER_TENANT_OCCUPANCY,
+  reservationBlocks,
+  tenantBlocks,
   type AvailabilityResult,
   type BookedRange,
-  type RoomTypeSlug,
 } from "./types";
 
 /**
- * Core booking logic. These functions run on the server (imported by the
- * `/book` Server Action and the `/api/availability` route). The website never
- * trusts the client for availability — every check re-runs here.
+ * Per-room availability against the live reservation database. Server-only —
+ * imported by `/api/availability` and the `/book` Server Action. The website
+ * never trusts the client; every check re-runs here.
  *
- * Overlap rule (inclusive of the date range, exclusive of the check-out day):
- *   existing_check_in < new_check_out  AND  existing_check_out > new_check_in
+ * Overlap rule (inclusive check-in, exclusive check-out):
+ *   existing.check_in_date < new.check_out  AND  existing.check_out_date > new.check_in
  *
- * Availability is resolved against PHYSICAL rooms: a room type is available
- * for a range only while at least one active room of that type has no blocking
- * (pending/confirmed) booking overlapping the range — regardless of the
- * booking's `source`, so reception / local-system bookings block the website.
+ * A room is unavailable for a range if a blocking `reservations` row overlaps
+ * it, or (when enabled) a long-term `tenants` occupancy overlaps it. Reads all
+ * reservations regardless of `source`, so front-desk bookings block the website.
  */
 
-interface RoomTypeLookup {
-  id: string;
-  roomIds: string[]; // active physical rooms of this type
-}
-
-async function loadRoomType(
-  slug: RoomTypeSlug,
-): Promise<RoomTypeLookup | null> {
-  const supabase = getSupabase();
-  if (!supabase) return null;
-
-  const { data: roomType, error: rtErr } = await supabase
-    .from("room_types")
-    .select("id")
-    .eq("slug", slug)
-    .single();
-
-  if (rtErr || !roomType) return null;
-
-  const { data: rooms, error: roomsErr } = await supabase
-    .from("rooms")
-    .select("id")
-    .eq("room_type_id", roomType.id)
-    .eq("is_active", true);
-
-  if (roomsErr) return null;
-
-  return {
-    id: roomType.id as string,
-    roomIds: (rooms ?? []).map((r) => r.id as string),
-  };
-}
-
-/** Distinct room ids with a blocking booking overlapping [checkIn, checkOut). */
-async function bookedRoomIds(
-  roomTypeId: string,
+/** True if any blocking reservation or tenancy overlaps the range; null on a
+ *  read error so callers can fail safe. */
+async function hasBlockingOverlap(
+  roomId: string,
   checkIn: string,
   checkOut: string,
-): Promise<Set<string>> {
-  const supabase = getSupabase();
-  if (!supabase) return new Set();
+): Promise<boolean | null> {
+  const supabase = getServerSupabase();
+  if (!supabase) return null;
+  const numId = Number(roomId);
 
-  const { data, error } = await supabase
-    .from("bookings")
-    .select("room_id")
-    .eq("room_type_id", roomTypeId)
-    .in("status", BLOCKING_STATUSES)
-    .lt("check_in", checkOut)
-    .gt("check_out", checkIn);
+  const { data: reservations, error } = await supabase
+    .from("reservations")
+    .select("status, check_in_date, check_out_date")
+    .eq("room_id", numId)
+    .lt("check_in_date", checkOut)
+    .gt("check_out_date", checkIn);
 
-  if (error || !data) return new Set();
+  if (error) {
+    console.error("availability read failed:", error.message);
+    return null;
+  }
+  if ((reservations ?? []).some((r) => reservationBlocks(r.status))) return true;
 
-  return new Set(
-    data
-      .map((b) => b.room_id as string | null)
-      .filter((id): id is string => Boolean(id)),
-  );
+  if (CONSIDER_TENANT_OCCUPANCY) {
+    const { data: tenants } = await supabase
+      .from("tenants")
+      .select("status, move_in_date, move_out_date")
+      .eq("room_id", numId)
+      .lt("move_in_date", checkOut);
+
+    const tenantOverlap = (tenants ?? []).some((t) => {
+      if (!tenantBlocks(t.status)) return false;
+      // Open-ended tenancy (no move-out) blocks everything from move-in on.
+      return !t.move_out_date || t.move_out_date > checkIn;
+    });
+    if (tenantOverlap) return true;
+  }
+
+  return false;
 }
 
-/** Check availability for a room type across a date range. */
-export async function checkAvailability(
-  slug: RoomTypeSlug,
+/** Check availability for one room across a date range. */
+export async function isRoomAvailable(
+  roomId: string,
   checkIn: string,
   checkOut: string,
 ): Promise<AvailabilityResult> {
@@ -89,92 +72,55 @@ export async function checkAvailability(
     return {
       configured: false,
       available: false,
-      totalRooms: 0,
-      remaining: 0,
       message: "Live availability is not connected yet.",
     };
   }
 
-  const rt = await loadRoomType(slug);
-  if (!rt) {
+  const blocked = await hasBlockingOverlap(roomId, checkIn, checkOut);
+  if (blocked === null) {
     return {
       configured: true,
       available: false,
-      totalRooms: 0,
-      remaining: 0,
-      message: "We couldn't find that room type.",
+      message: "We couldn't check availability just now. You can still send a request.",
     };
   }
 
-  const total = rt.roomIds.length;
-  if (total === 0) {
-    return {
-      configured: true,
-      available: false,
-      totalRooms: 0,
-      remaining: 0,
-      message: "No rooms of this type are set up yet.",
-    };
-  }
-
-  const booked = await bookedRoomIds(rt.id, checkIn, checkOut);
-  const remaining = rt.roomIds.filter((id) => !booked.has(id)).length;
-
-  return {
-    configured: true,
-    available: remaining > 0,
-    totalRooms: total,
-    remaining,
-    message:
-      remaining > 0
-        ? `${remaining} of ${total} ${
-            remaining === 1 ? "room" : "rooms"
-          } available for these dates.`
-        : "Fully booked for these dates. Try different dates.",
-  };
+  return blocked
+    ? {
+        configured: true,
+        available: false,
+        message: "This room is booked for these dates. Try different dates.",
+      }
+    : {
+        configured: true,
+        available: true,
+        message: "Available for your dates.",
+      };
 }
 
 /**
- * Find one free room id of the given type for the range, or null if none.
- * Used by the booking action immediately before insert.
+ * Upcoming blocking date ranges for a room, used to hint unavailable dates in
+ * the form. Selects dates only — never tenant PII.
  */
-export async function findFreeRoomId(
-  slug: RoomTypeSlug,
-  checkIn: string,
-  checkOut: string,
-): Promise<{ roomTypeId: string; roomId: string } | null> {
-  const rt = await loadRoomType(slug);
-  if (!rt || rt.roomIds.length === 0) return null;
-
-  const booked = await bookedRoomIds(rt.id, checkIn, checkOut);
-  const free = rt.roomIds.find((id) => !booked.has(id));
-  if (!free) return null;
-
-  return { roomTypeId: rt.id, roomId: free };
-}
-
-/**
- * All blocking date ranges for a room type, used to hint unavailable dates in
- * the form. (Coarse hint only — exact availability comes from checkAvailability
- * because a single overlapping range may still leave another room free.)
- */
-export async function getBlockingRanges(
-  slug: RoomTypeSlug,
+export async function getRoomBlockingRanges(
+  roomId: string,
 ): Promise<BookedRange[]> {
-  const supabase = getSupabase();
-  const rt = await loadRoomType(slug);
-  if (!supabase || !rt) return [];
+  const supabase = getServerSupabase();
+  if (!supabase) return [];
 
   const today = new Date().toISOString().slice(0, 10);
+  const numId = Number(roomId);
 
   const { data, error } = await supabase
-    .from("bookings")
-    .select("check_in, check_out")
-    .eq("room_type_id", rt.id)
-    .in("status", BLOCKING_STATUSES)
-    .gte("check_out", today)
-    .order("check_in", { ascending: true });
+    .from("reservations")
+    .select("status, check_in_date, check_out_date")
+    .eq("room_id", numId)
+    .gte("check_out_date", today)
+    .order("check_in_date", { ascending: true });
 
   if (error || !data) return [];
-  return data as BookedRange[];
+
+  return data
+    .filter((r) => reservationBlocks(r.status))
+    .map((r) => ({ check_in: r.check_in_date, check_out: r.check_out_date }));
 }

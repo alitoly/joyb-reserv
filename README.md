@@ -20,7 +20,8 @@ Live availability and booking require the env vars below.
 1. Create a project at [supabase.com](https://supabase.com).
 2. In the SQL editor, run [`supabase-schema.sql`](./supabase-schema.sql). It creates
    the `room_types`, `rooms`, and `bookings` tables, a database-level guard against
-   double-booking, Row Level Security policies, and seed data for the three rooms.
+   double-booking, Row Level Security policies, and seed data for the four room
+   types and their 17 named rooms.
 3. In **Project Settings → API**, copy the Project URL and the `anon` public key into
    `.env.local`:
 

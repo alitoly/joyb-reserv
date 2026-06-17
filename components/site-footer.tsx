@@ -11,7 +11,7 @@ export function SiteFooter() {
           </div>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-sand/70">
             A beachfront escape on the Zanzibar coast. Warm Swahili hospitality,
-            three thoughtful rooms, and the Indian Ocean at your doorstep.
+            17 thoughtful rooms, and the Indian Ocean at your doorstep.
           </p>
         </div>
 

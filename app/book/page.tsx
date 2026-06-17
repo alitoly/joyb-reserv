@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import { ROOMS } from "@/lib/rooms";
+import { listRooms } from "@/lib/rooms-data";
 import { BookingForm } from "@/components/booking-form";
 import { Reveal } from "@/components/reveal";
 import { Kicker, Section } from "@/components/ui";
 import { CheckIcon } from "@/components/icons";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Book your stay",
@@ -23,7 +25,14 @@ export default async function BookPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const params = await searchParams;
-  const roomParam = typeof params.room === "string" ? params.room : "";
+  const roomParam =
+    typeof params.room === "string"
+      ? params.room
+      : typeof params.type === "string"
+        ? params.type
+        : "";
+
+  const rooms = await listRooms();
 
   return (
     <Section className="py-16 sm:py-24" width="wide">
@@ -35,9 +44,9 @@ export default async function BookPage({
             Reserve your room by the ocean
           </h1>
           <p className="mt-5 max-w-md text-lg leading-relaxed text-ink-soft">
-            Choose your dates and room type. We check availability against every
-            booking in real time, including reservations made at the front
-            desk, so the dates you see are the dates you can have.
+            Choose your dates and your room. We check availability against every
+            booking in real time, including reservations made at the front desk,
+            so the dates you see are the dates you can have.
           </p>
 
           <ul className="mt-8 grid gap-4">
@@ -54,7 +63,20 @@ export default async function BookPage({
 
         {/* Form */}
         <Reveal delay={120}>
-          <BookingForm rooms={ROOMS} initialRoom={roomParam} />
+          {rooms.length > 0 ? (
+            <BookingForm rooms={rooms} initialRoomId={roomParam} />
+          ) : (
+            <div className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 sm:p-10">
+              <h2 className="font-display text-2xl text-charcoal">
+                Booking isn&apos;t connected yet
+              </h2>
+              <p className="mt-3 leading-relaxed text-ink-soft">
+                Our live room list isn&apos;t available right now. Please check
+                back shortly, or contact us and we&apos;ll arrange your stay
+                directly.
+              </p>
+            </div>
+          )}
         </Reveal>
       </div>
     </Section>

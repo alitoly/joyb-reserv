@@ -24,8 +24,8 @@ const VALUES = [
     body: "Solar hot water, refillable glass bottles, and seafood bought each morning from Jambiani's fishermen. Small footprint, big flavour.",
   },
   {
-    title: "Only three rooms",
-    body: "We kept JoyB small on purpose. Fewer rooms means quieter mornings, more space on the sand, and time to learn your name.",
+    title: "Just 17 rooms",
+    body: "We kept JoyB intimate on purpose. With only 17 rooms across four types, mornings stay quiet, the sand stays uncrowded, and there's time to learn your name.",
   },
 ];
 
@@ -64,7 +64,7 @@ export default function AboutPage() {
             the sound of fishermen pushing out.
           </p>
           <p className="mt-5 leading-relaxed text-ink-soft">
-            Over the years we added three rooms, a shaded terrace, and a kitchen
+            Over the years we grew to 17 rooms, a shaded terrace, and a kitchen
             that smells of cardamom and grilled fish. We never wanted a big hotel.
             We wanted a place where you could put your phone down, feel the sand
             warm under your feet, and remember what unhurried feels like. That’s

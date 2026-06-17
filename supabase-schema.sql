@@ -5,7 +5,7 @@
 -- It creates the room_types / rooms / bookings tables, a hard database-level
 -- guard against double-booking, Row Level Security policies suited to the
 -- public website (read availability + create pending bookings only), and seed
--- data for the three JoyB room types.
+-- data for the four JoyB room categories and their 17 named rooms.
 --
 -- The local reception system should connect with the SERVICE ROLE key (server
 -- side only) and write bookings with source = 'reception' or 'local_system'.
@@ -131,32 +131,52 @@ create policy "bookings public insert pending website"
 -- ============================================================================
 -- Seed data
 -- ----------------------------------------------------------------------------
--- Three room types + sample physical rooms. Edit room counts freely; the
--- website resolves availability from however many active rooms exist here.
+-- Four room categories + the 17 named physical rooms. Each room's room_number
+-- is its guest-facing name (Kigoma, Lindi, …) so the front-desk system shows
+-- the same names. The website resolves availability per category from however
+-- many active rooms exist here. Prices are nightly rates in USD.
+--   Double / Single  $50  (2 rooms)
+--   Twin             $50  (4 rooms)
+--   Double           $60  (10 rooms)  -- "12 double rooms" = Double + Double/Single
+--   Interconnected   $90  (1 room: Zanzibar, the executive room)
 -- ============================================================================
 insert into public.room_types (name, slug, description, capacity, base_price, image_url)
 values
-  ('Garden Single Room', 'garden-single',
-   'One bed with a private bathroom, opening onto the palm garden.', 1, 85,
+  ('Double / Single Room', 'double-single',
+   'A flexible room for one or two guests, with a private bathroom.', 2, 50,
    'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80'),
-  ('Ocean Twin Room', 'ocean-twin',
-   'Two beds with a private bathroom and a breezy balcony.', 2, 120,
+  ('Twin Room', 'twin',
+   'Two twin beds (5 ft x 6.5 ft) with a private bathroom.', 2, 50,
    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80'),
-  ('Master Suite', 'master-suite',
-   'One double bed with a private bathroom and panoramic ocean views.', 2, 195,
+  ('Double Room', 'double',
+   'One king-size bed (6 ft x 6 ft) with a private bathroom.', 2, 60,
+   'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1200&q=80'),
+  ('Interconnected Room', 'interconnected',
+   'Two connected rooms, ideal for families or connected stays.', 4, 90,
    'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1200&q=80')
 on conflict (slug) do nothing;
 
--- Sample inventory: 3 garden singles, 2 ocean twins, 1 master suite.
+-- Inventory: the 17 named rooms, each linked to its category by slug.
 insert into public.rooms (room_type_id, room_number)
 select rt.id, v.room_number
 from public.room_types rt
 join (values
-  ('garden-single', 'G1'),
-  ('garden-single', 'G2'),
-  ('garden-single', 'G3'),
-  ('ocean-twin',    'O1'),
-  ('ocean-twin',    'O2'),
-  ('master-suite',  'M1')
+  ('double-single', 'Kigoma'),
+  ('twin',          'Lindi'),
+  ('twin',          'Songea'),
+  ('double',        'Tabora'),
+  ('double',        'Morogoro'),
+  ('double',        'Shinyanga'),
+  ('double',        'Geita'),
+  ('double-single', 'Mwanza'),
+  ('double',        'Iringa'),
+  ('double',        'Dodoma'),
+  ('double',        'Dar-es-Salaam'),
+  ('interconnected','Zanzibar'),
+  ('double',        'Lushoto'),
+  ('double',        'Magoroto'),
+  ('twin',          'Tanga'),
+  ('double',        'Moshi'),
+  ('twin',          'Arusha')
 ) as v(slug, room_number) on v.slug = rt.slug
 on conflict (room_type_id, room_number) do nothing;

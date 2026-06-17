@@ -1,26 +1,43 @@
 import type { Metadata } from "next";
-import { ROOMS } from "@/lib/rooms";
+import { listRooms } from "@/lib/rooms-data";
+import {
+  BED_SIZES,
+  FACILITIES,
+  FACILITIES_SENTENCE,
+} from "@/lib/rooms";
+import type { RoomListing } from "@/lib/types";
 import { RoomCard } from "@/components/room-card";
 import { Reveal } from "@/components/reveal";
 import { ButtonLink, Kicker, Section } from "@/components/ui";
 import { CheckIcon } from "@/components/icons";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Rooms & rates",
   description:
-    "Three room types at JoyB Resort Zanzibar: the Garden Single, the Ocean Twin, and the Master Suite. Each with a private bathroom and island calm.",
+    "Browse every room at JoyB Resort Zanzibar with live nightly rates, capacity, and facilities. Pick your dates on the booking page to see what's free.",
 };
 
-const INCLUDED = [
-  "Private en-suite bathroom",
-  "Daily housekeeping",
-  "Air conditioning & ceiling fan",
-  "Free Wi-Fi throughout",
-  "Breakfast on the terrace",
-  "Beach towels & loungers",
-];
+/** Per-type roll-up (count + lowest nightly rate) computed from live rooms. */
+function summariseByType(rooms: RoomListing[]) {
+  const map = new Map<string, { count: number; minPrice: number }>();
+  for (const r of rooms) {
+    const cur = map.get(r.typeName);
+    if (cur) {
+      cur.count += 1;
+      cur.minPrice = Math.min(cur.minPrice, r.priceUsd);
+    } else {
+      map.set(r.typeName, { count: 1, minPrice: r.priceUsd });
+    }
+  }
+  return [...map.entries()].map(([typeName, v]) => ({ typeName, ...v }));
+}
 
-export default function RoomsPage() {
+export default async function RoomsPage() {
+  const rooms = await listRooms();
+  const byType = summariseByType(rooms);
+
   return (
     <>
       <Section className="pt-16 pb-10 sm:pt-24">
@@ -30,31 +47,48 @@ export default function RoomsPage() {
             Find the room that fits your stay
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft">
-            Every room opens to the garden or the sea, and every room comes with
-            a private bathroom. Pick your dates on the booking page to see exactly
-            what’s free.
+            Every room comes with a private bathroom and the same thoughtful
+            facilities. Pick your dates on the booking page to see exactly
+            what&apos;s free.
           </p>
         </Reveal>
       </Section>
 
-      <Section className="pb-16">
-        <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-          {ROOMS.map((room, i) => (
-            <Reveal as="div" key={room.slug} delay={i * 90} className="h-full">
-              <RoomCard room={room} priority={i === 0} />
-            </Reveal>
-          ))}
-        </div>
+      {/* All rooms */}
+      <Section className="py-12">
+        <Reveal className="max-w-2xl">
+          <h2 className="font-display text-3xl text-charcoal">Our rooms</h2>
+          <p className="mt-3 leading-relaxed text-ink-soft">
+            {rooms.length > 0
+              ? "Here is every room with its type, capacity, and nightly rate."
+              : "Our live room list isn't available right now. Please check back shortly."}
+          </p>
+        </Reveal>
+        {rooms.length > 0 && (
+          <div className="mt-10 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+            {rooms.map((room, i) => (
+              <Reveal
+                as="div"
+                key={room.id}
+                delay={(i % 3) * 90}
+                className="h-full"
+              >
+                <RoomCard room={room} priority={i === 0} />
+              </Reveal>
+            ))}
+          </div>
+        )}
       </Section>
 
-      {/* What's included */}
+      {/* Facilities */}
       <Section className="py-12">
         <Reveal className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 sm:p-12">
-          <h2 className="font-display text-3xl text-charcoal">
-            Included with every room
-          </h2>
+          <h2 className="font-display text-3xl text-charcoal">In every room</h2>
+          <p className="mt-3 max-w-2xl leading-relaxed text-ink-soft">
+            {FACILITIES_SENTENCE}
+          </p>
           <ul className="mt-8 grid gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
-            {INCLUDED.map((item) => (
+            {FACILITIES.map((item) => (
               <li key={item} className="flex items-start gap-3 text-ink-soft">
                 <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green/10 text-green">
                   <CheckIcon className="h-4 w-4" />
@@ -66,13 +100,120 @@ export default function RoomsPage() {
         </Reveal>
       </Section>
 
+      {/* Room summary + bed sizes */}
+      {byType.length > 0 && (
+        <Section className="py-12">
+          <div className="grid gap-7 lg:grid-cols-2">
+            {/* Summary */}
+            <Reveal
+              as="div"
+              className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 sm:p-10"
+            >
+              <h2 className="font-display text-3xl text-charcoal">
+                Room summary
+              </h2>
+              <table className="mt-6 w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-charcoal/10 text-ink-soft">
+                    <th className="py-3 font-medium">Room type</th>
+                    <th className="py-3 text-right font-medium">Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {byType.map((row) => (
+                    <tr
+                      key={row.typeName}
+                      className="border-b border-charcoal/5"
+                    >
+                      <td className="py-3 text-charcoal">{row.typeName}</td>
+                      <td className="py-3 text-right font-display text-lg text-charcoal">
+                        {row.count}
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="font-semibold">
+                    <td className="py-3 text-charcoal">Total rooms</td>
+                    <td className="py-3 text-right font-display text-lg text-charcoal">
+                      {rooms.length}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </Reveal>
+
+            {/* Bed sizes */}
+            <Reveal
+              as="div"
+              delay={120}
+              className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 sm:p-10"
+            >
+              <h2 className="font-display text-3xl text-charcoal">Bed sizes</h2>
+              <table className="mt-6 w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-charcoal/10 text-ink-soft">
+                    <th className="py-3 font-medium">Bed type</th>
+                    <th className="py-3 text-right font-medium">Size</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {BED_SIZES.map((row) => (
+                    <tr
+                      key={row.label}
+                      className="border-b border-charcoal/5 last:border-0"
+                    >
+                      <td className="py-3 text-charcoal">{row.label}</td>
+                      <td className="py-3 text-right text-ink-soft">
+                        {row.size}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Reveal>
+          </div>
+        </Section>
+      )}
+
+      {/* Price list */}
+      {byType.length > 0 && (
+        <Section className="py-12">
+          <Reveal className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 sm:p-10">
+            <h2 className="font-display text-3xl text-charcoal">Price list</h2>
+            <p className="mt-3 leading-relaxed text-ink-soft">
+              Nightly rates in US dollars.
+            </p>
+            <table className="mt-6 w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-charcoal/10 text-ink-soft">
+                  <th className="py-3 font-medium">Room type</th>
+                  <th className="py-3 text-right font-medium">From / night</th>
+                </tr>
+              </thead>
+              <tbody>
+                {byType.map((row) => (
+                  <tr
+                    key={row.typeName}
+                    className="border-b border-charcoal/5 last:border-0"
+                  >
+                    <td className="py-3 text-charcoal">{row.typeName}</td>
+                    <td className="py-3 text-right font-display text-lg text-charcoal">
+                      ${row.minPrice}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Reveal>
+        </Section>
+      )}
+
       <Section className="pb-8">
         <Reveal className="rounded-[2rem] bg-charcoal px-6 py-14 text-center sm:px-10">
           <h2 className="mx-auto max-w-2xl text-[clamp(1.8rem,3.5vw,2.6rem)] leading-tight text-white">
             Ready when you are
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-sand/80">
-            Choose your dates and room, and we’ll hold it for you.
+            Choose your dates and room, and we&apos;ll hold it for you.
           </p>
           <div className="mt-7 flex justify-center">
             <ButtonLink href="/book" variant="gold" className="px-8">
