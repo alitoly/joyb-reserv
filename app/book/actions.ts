@@ -5,6 +5,10 @@ import { isRoomAvailable } from "@/lib/bookings";
 import { getRoom } from "@/lib/rooms-data";
 import { isValidISODate, nightsBetween, todayISO } from "@/lib/dates";
 import { NEW_RESERVATION_SOURCE, NEW_RESERVATION_STATUS } from "@/lib/types";
+import { sendReservationEmail } from "@/lib/email";
+
+/** Upper bound on guests when a room's capacity isn't known from the DB. */
+const MAX_GUESTS_FALLBACK = 6;
 
 export interface BookingSuccess {
   status: "success";
@@ -56,9 +60,20 @@ export async function createBooking(
   const guestEmail = str(formData, "guestEmail");
   const guestPhone = str(formData, "guestPhone");
   const message = str(formData, "message");
+  const guests = Number.parseInt(str(formData, "guests") || "1", 10);
 
   const fieldErrors: Record<string, string> = {};
   const room = await getRoom(roomId);
+
+  // Validate guest count against the room's capacity (no DB column for it — it
+  // is stored within `notes`). Falls back to a sane bound when capacity is null.
+  const maxGuests =
+    room?.capacity && room.capacity > 0 ? room.capacity : MAX_GUESTS_FALLBACK;
+  if (!Number.isInteger(guests) || guests < 1) {
+    fieldErrors.guests = "Choose how many guests are staying.";
+  } else if (guests > maxGuests) {
+    fieldErrors.guests = `This room sleeps up to ${maxGuests}.`;
+  }
 
   if (!room) fieldErrors.room = "Please choose a room.";
   if (!guestName) fieldErrors.guestName = "Please tell us your name.";
@@ -104,6 +119,10 @@ export async function createBooking(
   const nights = nightsBetween(checkIn, checkOut);
   const totalAmount = Number((room.priceUsd * nights).toFixed(2));
 
+  // The shared reservations table has no guests column, so fold the count into
+  // `notes` (kept first so the front desk sees it at a glance).
+  const notes = [`Guests: ${guests}`, message].filter(Boolean).join("\n");
+
   const { data, error } = await supabase
     .from("reservations")
     .insert({
@@ -116,7 +135,7 @@ export async function createBooking(
       status: NEW_RESERVATION_STATUS,
       source: NEW_RESERVATION_SOURCE,
       total_amount: totalAmount,
-      notes: message || null,
+      notes,
     })
     .select("id")
     .single();
@@ -139,6 +158,27 @@ export async function createBooking(
   }
 
   const reference = `JB${String(data.id).padStart(5, "0")}`;
+
+  // Notify the manager so they can confirm with the guest. Best-effort: a mail
+  // failure must never fail a booking that was already saved.
+  try {
+    await sendReservationEmail({
+      reference,
+      roomName: room.name,
+      checkIn,
+      checkOut,
+      nights,
+      guests,
+      guestName,
+      guestEmail,
+      guestPhone,
+      totalUsd: totalAmount,
+      notes: message || null,
+    });
+  } catch (mailError) {
+    console.error("reservation email failed:", mailError);
+  }
+
   return {
     status: "success",
     reference,

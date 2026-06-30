@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
 import { listRooms } from "@/lib/rooms-data";
-import {
-  BED_SIZES,
-  FACILITIES,
-  FACILITIES_SENTENCE,
-} from "@/lib/rooms";
-import type { RoomListing } from "@/lib/types";
+import { BED_SIZES, FACILITIES, FACILITIES_SENTENCE } from "@/lib/rooms";
 import { RoomCard } from "@/components/room-card";
 import { Reveal } from "@/components/reveal";
-import { ButtonLink, Kicker, Section } from "@/components/ui";
+import { Kicker, Section } from "@/components/ui";
 import { CheckIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
@@ -19,24 +14,8 @@ export const metadata: Metadata = {
     "Browse every room at JoyB Resort Zanzibar with live nightly rates, capacity, and facilities. Pick your dates on the booking page to see what's free.",
 };
 
-/** Per-type roll-up (count + lowest nightly rate) computed from live rooms. */
-function summariseByType(rooms: RoomListing[]) {
-  const map = new Map<string, { count: number; minPrice: number }>();
-  for (const r of rooms) {
-    const cur = map.get(r.typeName);
-    if (cur) {
-      cur.count += 1;
-      cur.minPrice = Math.min(cur.minPrice, r.priceUsd);
-    } else {
-      map.set(r.typeName, { count: 1, minPrice: r.priceUsd });
-    }
-  }
-  return [...map.entries()].map(([typeName, v]) => ({ typeName, ...v }));
-}
-
 export default async function RoomsPage() {
   const rooms = await listRooms();
-  const byType = summariseByType(rooms);
 
   return (
     <>
@@ -80,148 +59,48 @@ export default async function RoomsPage() {
         )}
       </Section>
 
-      {/* Facilities */}
+      {/* Facilities + Bed sizes */}
       <Section className="py-12">
-        <Reveal className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 sm:p-12">
-          <h2 className="font-display text-3xl text-charcoal">In every room</h2>
-          <p className="mt-3 max-w-2xl leading-relaxed text-ink-soft">
-            {FACILITIES_SENTENCE}
-          </p>
-          <ul className="mt-8 grid gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FACILITIES.map((item) => (
-              <li key={item} className="flex items-start gap-3 text-ink-soft">
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green/10 text-green">
-                  <CheckIcon className="h-4 w-4" />
-                </span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </Reveal>
-      </Section>
-
-      {/* Room summary + bed sizes */}
-      {byType.length > 0 && (
-        <Section className="py-12">
-          <div className="grid gap-7 lg:grid-cols-2">
-            {/* Summary */}
-            <Reveal
-              as="div"
-              className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 sm:p-10"
-            >
-              <h2 className="font-display text-3xl text-charcoal">
-                Room summary
-              </h2>
-              <table className="mt-6 w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-charcoal/10 text-ink-soft">
-                    <th className="py-3 font-medium">Room type</th>
-                    <th className="py-3 text-right font-medium">Count</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {byType.map((row) => (
-                    <tr
-                      key={row.typeName}
-                      className="border-b border-charcoal/5"
-                    >
-                      <td className="py-3 text-charcoal">{row.typeName}</td>
-                      <td className="py-3 text-right font-display text-lg text-charcoal">
-                        {row.count}
-                      </td>
-                    </tr>
-                  ))}
-                  <tr className="font-semibold">
-                    <td className="py-3 text-charcoal">Total rooms</td>
-                    <td className="py-3 text-right font-display text-lg text-charcoal">
-                      {rooms.length}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </Reveal>
-
-            {/* Bed sizes */}
-            <Reveal
-              as="div"
-              delay={120}
-              className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 sm:p-10"
-            >
-              <h2 className="font-display text-3xl text-charcoal">Bed sizes</h2>
-              <table className="mt-6 w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-charcoal/10 text-ink-soft">
-                    <th className="py-3 font-medium">Bed type</th>
-                    <th className="py-3 text-right font-medium">Size</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {BED_SIZES.map((row) => (
-                    <tr
-                      key={row.label}
-                      className="border-b border-charcoal/5 last:border-0"
-                    >
-                      <td className="py-3 text-charcoal">{row.label}</td>
-                      <td className="py-3 text-right text-ink-soft">
-                        {row.size}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Reveal>
-          </div>
-        </Section>
-      )}
-
-      {/* Price list */}
-      {byType.length > 0 && (
-        <Section className="py-12">
-          <Reveal className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 sm:p-10">
-            <h2 className="font-display text-3xl text-charcoal">Price list</h2>
-            <p className="mt-3 leading-relaxed text-ink-soft">
-              Nightly rates in US dollars.
+        <div className="grid gap-7 lg:grid-cols-2">
+          <Reveal className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 sm:p-12">
+            <h2 className="font-display text-3xl text-charcoal">In every room</h2>
+            <p className="mt-3 max-w-2xl leading-relaxed text-ink-soft">
+              {FACILITIES_SENTENCE}
             </p>
+            <ul className="mt-8 grid gap-x-8 gap-y-4 sm:grid-cols-2">
+              {FACILITIES.map((item) => (
+                <li key={item} className="flex items-start gap-3 text-ink-soft">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green/10 text-green">
+                    <CheckIcon className="h-4 w-4" />
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+
+          <Reveal delay={120} className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 sm:p-10">
+            <h2 className="font-display text-3xl text-charcoal">Bed sizes</h2>
             <table className="mt-6 w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-charcoal/10 text-ink-soft">
-                  <th className="py-3 font-medium">Room type</th>
-                  <th className="py-3 text-right font-medium">From / night</th>
+                  <th className="py-3 font-medium">Bed type</th>
+                  <th className="py-3 text-right font-medium">Size</th>
                 </tr>
               </thead>
               <tbody>
-                {byType.map((row) => (
-                  <tr
-                    key={row.typeName}
-                    className="border-b border-charcoal/5 last:border-0"
-                  >
-                    <td className="py-3 text-charcoal">{row.typeName}</td>
-                    <td className="py-3 text-right font-display text-lg text-charcoal">
-                      ${row.minPrice}
-                    </td>
+                {BED_SIZES.map((row) => (
+                  <tr key={row.label} className="border-b border-charcoal/5 last:border-0">
+                    <td className="py-3 text-charcoal">{row.label}</td>
+                    <td className="py-3 text-right text-ink-soft">{row.size}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </Reveal>
-        </Section>
-      )}
-
-      <Section className="pb-8">
-        <Reveal className="rounded-[2rem] bg-charcoal px-6 py-14 text-center sm:px-10">
-          <h2 className="mx-auto max-w-2xl text-[clamp(1.8rem,3.5vw,2.6rem)] leading-tight text-white">
-            Ready when you are
-          </h2>
-          <p className="mx-auto mt-3 max-w-lg text-sand/80">
-            Choose your dates and room, and we&apos;ll hold it for you.
-          </p>
-          <div className="mt-7 flex justify-center">
-            <ButtonLink href="/book" variant="gold" className="px-8">
-              Book your stay
-            </ButtonLink>
-          </div>
-        </Reveal>
+        </div>
       </Section>
+
     </>
   );
 }

@@ -20,16 +20,18 @@ const mulish = Mulish({
 
 export const metadata: Metadata = {
   title: {
-    default: "JoyB Resort · Beachfront escape in Zanzibar",
+    default: "JoyB Resort · Quiet garden retreat in Zanzibar",
     template: "%s · JoyB Resort",
   },
   description:
-    "A barefoot-luxury resort on the Zanzibar coast. Three thoughtfully designed rooms, warm Swahili hospitality, and easy online booking.",
+    "A peaceful garden retreat in the heart of Zanzibar, minutes from the airport. Calm, comfortable rooms, warm Swahili hospitality, and easy online booking.",
   keywords: [
     "JoyB Resort",
     "Zanzibar hotel",
     "Zanzibar resort",
-    "beach resort",
+    "Zanzibar guesthouse",
+    "garden retreat Zanzibar",
+    "near Zanzibar airport",
     "Tanzania",
   ],
 };

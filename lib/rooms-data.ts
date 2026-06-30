@@ -45,7 +45,13 @@ function resolveImageUrl(path: string | null | undefined): string {
 function toListing(r: RoomJoinRow): RoomListing {
   const name = r.room_name?.trim() || `Room ${r.id}`;
   const typeName = r.room_types?.name?.trim() || "Room";
-  const firstImage = r.room_images?.[0]?.image_path ?? null;
+  // Resolve every image_path into a usable URL for the gallery. Always keep at
+  // least one entry so the details page never renders an empty gallery.
+  const resolved = (r.room_images ?? [])
+    .map((img) => img?.image_path)
+    .filter((p): p is string => Boolean(p && p.trim()))
+    .map(resolveImageUrl);
+  const images = resolved.length > 0 ? resolved : [resolveImageUrl(null)];
   return {
     id: String(r.id),
     name,
@@ -53,7 +59,8 @@ function toListing(r: RoomJoinRow): RoomListing {
     capacity: r.pax?.value ?? null,
     priceUsd: Number(r.day_payment ?? 0),
     description: r.description?.trim() || null,
-    imageUrl: resolveImageUrl(firstImage),
+    imageUrl: images[0],
+    images,
     imageAlt: `${name} - ${typeName} at JoyB Resort`,
   };
 }

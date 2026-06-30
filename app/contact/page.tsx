@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { ContactForm } from "@/components/contact-form";
 import { Reveal } from "@/components/reveal";
 import { Kicker, Section } from "@/components/ui";
@@ -8,17 +7,15 @@ import { MapPinIcon, PhoneIcon, MailIcon } from "@/components/icons";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Get in touch with JoyB Resort in Jambiani, Zanzibar. Questions about rooms, transfers, or your stay; we're happy to help.",
+    "Get in touch with JoyB Resort in Zanzibar, minutes from the airport. Questions about rooms, transfers, or your stay; we're happy to help.",
 };
-
-const mapImg =
-  "https://images.unsplash.com/photo-1582610116397-edb318620f90?auto=format&fit=crop&w=1400&q=80";
 
 const DETAILS = [
   {
     icon: MapPinIcon,
     label: "Address",
-    lines: ["Jambiani Beach Road", "Zanzibar, Tanzania"],
+    lines: ["Minutes from Zanzibar Airport", "Zanzibar, Tanzania"],
+    href: "https://maps.app.goo.gl/aag3trMGFzyjQMga9",
   },
   {
     icon: PhoneIcon,
@@ -29,8 +26,8 @@ const DETAILS = [
   {
     icon: MailIcon,
     label: "Email",
-    lines: ["stay@joybresort.com"],
-    href: "mailto:stay@joybresort.com",
+    lines: ["reservation@joybresort.com"],
+    href: "mailto:reservation@joybresort.com",
   },
 ];
 
@@ -41,11 +38,11 @@ export default function ContactPage() {
         <Reveal className="max-w-3xl">
           <Kicker>Contact</Kicker>
           <h1 className="mt-4 text-[clamp(2.5rem,5vw,4rem)] leading-[1.05] text-charcoal">
-            We’d love to hear from you
+            We'd love to hear from you
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft">
-            Planning a stay, arranging an airport transfer, or just curious about
-            the tides? Send us a note and a real person will write back.
+            Planning a stay, arranging an airport pickup, or just curious about
+            the area? Send us a note and a real person will write back.
           </p>
         </Reveal>
       </Section>
@@ -82,6 +79,8 @@ export default function ContactPage() {
                           <a
                             href={d.href}
                             className="transition-colors hover:text-green"
+                            target={d.href.startsWith("http") ? "_blank" : undefined}
+                            rel={d.href.startsWith("http") ? "noopener noreferrer" : undefined}
                           >
                             {line}
                           </a>
@@ -95,18 +94,28 @@ export default function ContactPage() {
               ))}
             </ul>
 
-            <figure className="relative aspect-[4/3] overflow-hidden rounded-2xl ring-1 ring-charcoal/5">
-              <Image
-                src={mapImg}
-                alt="Aerial view of the Jambiani coastline, turquoise shallows fading into deep ocean"
-                fill
-                sizes="(max-width: 1024px) 100vw, 33vw"
-                className="object-cover"
+            {/* Google Maps embed */}
+            <div className="overflow-hidden rounded-2xl ring-1 ring-charcoal/5">
+              <iframe
+                src="https://maps.google.com/maps?q=JoyB+Resort+Zanzibar&output=embed&z=15"
+                width="100%"
+                height="260"
+                style={{ border: 0, display: "block" }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="JoyB Resort location on Google Maps"
               />
-              <figcaption className="absolute bottom-0 left-0 right-0 bg-charcoal/70 px-4 py-2 text-sm text-sand">
-                Jambiani, east coast of Zanzibar · map coming soon
-              </figcaption>
-            </figure>
+              <a
+                href="https://maps.app.goo.gl/aag3trMGFzyjQMga9"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 bg-surface px-4 py-3 text-sm font-medium text-green transition-colors hover:text-green-strong"
+              >
+                <MapPinIcon className="h-4 w-4" />
+                Open in Google Maps
+              </a>
+            </div>
           </Reveal>
         </div>
       </Section>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "./logo";
 import { ButtonLink } from "./ui";
+import { createBrowserSupabase, isAuthConfigured } from "@/lib/supabase-auth";
 
 const NAV = [
   { href: "/", label: "Home" },
@@ -17,6 +18,7 @@ export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -24,6 +26,22 @@ export function SiteHeader() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Reflect auth state in the header (Sign in ↔ Account). Set state only from
+  // async callbacks, never synchronously in the effect body.
+  useEffect(() => {
+    if (!isAuthConfigured) return;
+    const supabase = createBrowserSupabase();
+    supabase.auth.getUser().then(({ data }) => setSignedIn(Boolean(data.user)));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) =>
+      setSignedIn(Boolean(session?.user)),
+    );
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const authLink = signedIn
+    ? { href: "/account", label: "My account" }
+    : { href: "/login", label: "Sign in" };
 
   return (
     <header
@@ -62,7 +80,13 @@ export function SiteHeader() {
           </ul>
         </nav>
 
-        <div className="hidden md:block">
+        <div className="hidden items-center gap-2 md:flex">
+          <Link
+            href={authLink.href}
+            className="rounded-full px-4 py-2 text-sm font-medium text-charcoal/70 transition-colors duration-200 hover:text-charcoal"
+          >
+            {authLink.label}
+          </Link>
           <ButtonLink href="/book" variant="primary">
             Book now
           </ButtonLink>
@@ -125,6 +149,15 @@ export function SiteHeader() {
                 </li>
               );
             })}
+            <li>
+              <Link
+                href={authLink.href}
+                onClick={() => setOpen(false)}
+                className="block rounded-xl px-4 py-3 text-base font-medium text-charcoal/80 hover:bg-sand-deep"
+              >
+                {authLink.label}
+              </Link>
+            </li>
             <li className="pt-2">
               <ButtonLink
                 href="/book"

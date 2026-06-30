@@ -26,7 +26,7 @@ body — move it into a handler or async callback) and `react/no-unescaped-entit
 
 ## What this is
 
-Booking website for **JoyB Resort**, a beachfront resort in Zanzibar. Five pages
+Booking website for **JoyB Resort**, a garden resort in the heart of Zanzibar, minutes from the airport. Five pages
 (Home, Rooms, About, Contact, Book) plus a Supabase-backed booking flow that must
 stay in sync with the resort's separate front-desk reservation system.
 
@@ -64,6 +64,14 @@ dynamically per-room (not hardcoded, not grouped by type).
    `reservations` with `source = 'website'`. It treats a Postgres `23P01`
    (exclusion_violation) as "just taken" — relevant only if the DB has a double-booking
    exclusion constraint (confirm; add one if missing).
+
+**Auth (`lib/supabase-auth*.ts`, `proxy.ts`):** Supabase Auth (anon key, `NEXT_PUBLIC_`)
+powers two roles. Guests self-signup at `/signup` and see their own bookings at
+`/account` (matched on `tenant_email`; booking stays anonymous-optional). Managers are
+the emails in **`MANAGER_EMAILS`** (now **required** — an empty list grants admin to no
+one) and get `/admin/reservations` + `/admin/manage` (calendar). Cancelling a booking
+writes `CANCELLED_RESERVATION_STATUS`, which is non-blocking so the dates free up. The
+`proxy.ts` matcher guards `/account/**` (any user) and `/admin/**` (managers only).
 
 **Prerequisite:** the `service_role` role needs `GRANT SELECT` on `rooms, room_types,
 pax, room_images, reservations, tenants` and `GRANT INSERT` on `reservations` — until

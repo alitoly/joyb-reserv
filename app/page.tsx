@@ -1,44 +1,65 @@
 import Image from "next/image";
-import { listRooms } from "@/lib/rooms-data";
-import { RoomCard } from "@/components/room-card";
 import { Reveal } from "@/components/reveal";
 import { ButtonLink, Kicker, Section } from "@/components/ui";
-import { WaveIcon, BedIcon, CalendarIcon } from "@/components/icons";
+import { PalmIcon, BedIcon } from "@/components/icons";
+
 
 export const revalidate = 300;
 
+// Neutral placeholder imagery. Swap for real resort photos.
 const heroImg =
-  "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?auto=format&fit=crop&w=2000&q=80";
-const storyImg =
-  "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1400&q=80";
+  "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=2000&q=80";
+
+// Gallery placeholders — replace with actual resort photos
+const GALLERY = [
+  {
+    src: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=900&q=80",
+    alt: "Lush garden path between tropical plants",
+    className: "col-span-2 row-span-2",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=700&q=80",
+    alt: "Calm bright room with a leafy plant and simple chair",
+    className: "",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=700&q=80",
+    alt: "Quiet outdoor seating area under palm shade",
+    className: "",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1596436889106-be35e843f974?auto=format&fit=crop&w=700&q=80",
+    alt: "Simple clean room interior",
+    className: "",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=700&q=80",
+    alt: "Garden terrace at golden hour",
+    className: "",
+  },
+];
 
 const FEATURES = [
   {
-    icon: WaveIcon,
-    title: "On the beach",
-    body: "Step from your room onto soft white sand. The Indian Ocean sets the rhythm of every JoyB day, from sunrise swims to dhow sunsets.",
+    icon: PalmIcon,
+    title: "A quiet garden setting",
+    body: "Lawns, palms, and shaded corners to slow down in. JoyB is a calm, green pocket in the heart of the island, minutes from the airport.",
   },
   {
     icon: BedIcon,
     title: "Rooms made for rest",
     body: "17 rooms across four room types, each with a private bathroom, AC or fan, and linen kept crisp. Designed for calm, not clutter.",
   },
-  {
-    icon: CalendarIcon,
-    title: "Booking without the back-and-forth",
-    body: "Pick your dates, see what's free in real time, and reserve in a minute. Your booking syncs straight to our front desk.",
-  },
 ];
 
 export default async function HomePage() {
-  const featured = (await listRooms()).slice(0, 4);
   return (
     <>
       {/* Hero */}
       <section className="relative isolate min-h-[88vh] w-full overflow-hidden">
         <Image
           src={heroImg}
-          alt="Turquoise water meeting white sand on the Zanzibar coast at golden hour"
+          alt="A broad green tree in a quiet grassy garden under a soft blue sky"
           fill
           priority
           sizes="100vw"
@@ -51,15 +72,15 @@ export default async function HomePage() {
         <Section className="flex min-h-[88vh] flex-col justify-center py-28">
           <div className="max-w-2xl text-sand">
             <p className="font-medium tracking-wide text-gold">
-              Jambiani · Zanzibar
+              In the heart of Zanzibar
             </p>
             <h1 className="mt-4 font-display text-[clamp(2.75rem,7vw,5.25rem)] leading-[1.02] text-white">
-              A barefoot-luxury escape on the Zanzibar coast
+              A peaceful garden retreat in the heart of Zanzibar
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-sand/90">
-              JoyB Resort is a small beachfront hideaway where warm Swahili
-              hospitality meets the slow blue of the Indian Ocean. Stay a few
-              nights. Leave on island time.
+              JoyB Resort is a quiet garden guesthouse just minutes from the
+              airport, with warm Swahili hospitality and calm, comfortable
+              rooms. An easy place to land, rest, and explore the island.
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <ButtonLink href="/book" variant="gold" className="px-8">
@@ -86,7 +107,7 @@ export default async function HomePage() {
           </h2>
         </Reveal>
 
-        <div className="mt-14 grid gap-x-10 gap-y-12 md:grid-cols-3">
+        <div className="mt-14 grid gap-x-10 gap-y-12 md:grid-cols-2">
           {FEATURES.map((f, i) => (
             <Reveal as="div" key={f.title} delay={i * 90}>
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-green/10 text-green">
@@ -101,78 +122,35 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      {/* Story split */}
+      {/* Gallery */}
       <Section className="py-12 sm:py-16">
-        <div className="grid items-center gap-10 rounded-[2rem] bg-surface p-6 ring-1 ring-charcoal/5 sm:p-10 lg:grid-cols-2 lg:gap-16">
-          <Reveal className="relative aspect-[5/4] overflow-hidden rounded-3xl">
-            <Image
-              src={storyImg}
-              alt="Palm-shaded terrace with loungers looking out over a calm turquoise lagoon"
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-            />
-          </Reveal>
-          <Reveal delay={120}>
-            <Kicker>Island time</Kicker>
-            <h2 className="mt-4 text-[clamp(1.9rem,3.5vw,2.75rem)] leading-tight text-charcoal">
-              Days that move at the pace of the tide
-            </h2>
-            <p className="mt-5 leading-relaxed text-ink-soft">
-              Wake to the sound of the reef. Spend the morning in the water, the
-              afternoon under a palm, the evening with grilled seafood and the
-              sky going gold. JoyB is built around doing less, beautifully.
-            </p>
-            <div className="mt-8">
-              <ButtonLink href="/about" variant="outline">
-                Our story
-              </ButtonLink>
-            </div>
-          </Reveal>
-        </div>
-      </Section>
-
-      {/* Rooms preview */}
-      {featured.length > 0 && (
-        <Section className="py-20 sm:py-28">
-          <Reveal className="flex flex-wrap items-end justify-between gap-4">
-            <div className="max-w-2xl">
-              <Kicker>Where you’ll stay</Kicker>
-              <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-tight text-charcoal">
-                Rooms made for the view
-              </h2>
-            </div>
-            <ButtonLink href="/rooms" variant="outline">
-              All rooms &amp; rates
-            </ButtonLink>
-          </Reveal>
-
-          <div className="mt-12 grid gap-7 md:grid-cols-2 lg:grid-cols-4">
-            {featured.map((room, i) => (
-              <Reveal as="div" key={room.id} delay={i * 90} className="h-full">
-                <RoomCard room={room} priority={i === 0} />
-              </Reveal>
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* Closing CTA */}
-      <Section className="pb-8">
-        <Reveal className="relative isolate overflow-hidden rounded-[2rem] bg-green px-6 py-16 text-center sm:px-10 sm:py-20">
-          <h2 className="mx-auto max-w-2xl text-[clamp(1.9rem,4vw,3rem)] leading-tight text-white">
-            Your room by the ocean is waiting
+        <Reveal className="mb-10">
+          <Kicker>The resort</Kicker>
+          <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-tight text-charcoal">
+            A calm place to call home
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-sand/90">
-            Check live availability and reserve in under a minute. No account
-            needed.
-          </p>
-          <div className="mt-8 flex justify-center">
-            <ButtonLink href="/book" variant="gold" className="px-8">
-              Check availability
-            </ButtonLink>
-          </div>
         </Reveal>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {GALLERY.map((img, i) => (
+            <Reveal
+              key={img.src}
+              delay={i * 60}
+              className={`relative overflow-hidden rounded-2xl bg-sand-deep ${
+                i === 0 ? "col-span-2 row-span-2 aspect-square sm:aspect-auto sm:min-h-[340px]" : "aspect-square"
+              }`}
+            >
+              <Image
+                src={img.src}
+                alt={img.alt}
+                fill
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                className="object-cover transition-transform duration-700 hover:scale-105"
+              />
+            </Reveal>
+          ))}
+        </div>
+
       </Section>
     </>
   );

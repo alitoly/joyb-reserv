@@ -47,3 +47,48 @@ export const BED_SIZES = [
 
 export const BED_SIZES_SENTENCE =
   "Bed sizes vary by room type. Single beds are 3.5 ft x 6 ft, twin beds are 5 ft x 6.5 ft, deluxe single beds are 3.5 ft x 6.5 ft, and double beds are 6 ft x 6 ft.";
+
+// ---------------------------------------------------------------------------
+// Per-room-type presentation defaults
+//
+// The shared front-desk database has no per-room "size" or "facilities"
+// columns, so the room details page derives these from the room TYPE. These are
+// display-only defaults — adjust the copy here, not in the database. Lookups are
+// case-insensitive and fall back to sensible values for unknown types.
+// ---------------------------------------------------------------------------
+
+interface RoomTypePreset {
+  /** Approximate room footprint, shown on the details page. */
+  size: string;
+  /** Extra, type-specific facilities layered on top of FACILITIES. */
+  extras: readonly string[];
+}
+
+const ROOM_TYPE_PRESETS: Record<string, RoomTypePreset> = {
+  "double/single": { size: "18 m² (approx.)", extras: ["Garden view"] },
+  twin: { size: "20 m² (approx.)", extras: ["Two single beds", "Garden view"] },
+  double: { size: "22 m² (approx.)", extras: ["Queen bed", "Garden view"] },
+  interconnected: {
+    size: "38 m² (approx.)",
+    extras: ["Two connected rooms", "Family friendly", "Garden view"],
+  },
+};
+
+const DEFAULT_PRESET: RoomTypePreset = {
+  size: "20 m² (approx.)",
+  extras: [],
+};
+
+function presetForType(typeName: string): RoomTypePreset {
+  return ROOM_TYPE_PRESETS[typeName.trim().toLowerCase()] ?? DEFAULT_PRESET;
+}
+
+/** Approximate size for a room type (presentation-only). */
+export function roomSizeForType(typeName: string): string {
+  return presetForType(typeName).size;
+}
+
+/** Full facilities list for a room type: the shared base plus type extras. */
+export function facilitiesForType(typeName: string): string[] {
+  return [...FACILITIES, ...presetForType(typeName).extras];
+}

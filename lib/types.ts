@@ -12,7 +12,8 @@ export interface RoomListing {
   capacity: number | null; // pax.value
   priceUsd: number; // rooms.day_payment (per night)
   description: string | null; // rooms.description
-  imageUrl: string; // resolved Storage/public URL (or fallback)
+  imageUrl: string; // first resolved Storage/public URL (or fallback)
+  images: string[]; // all resolved image URLs (gallery); always ≥ 1 (fallback)
   imageAlt: string;
 }
 
@@ -83,6 +84,11 @@ export const CONSIDER_TENANT_OCCUPANCY = true;
  *  If an INSERT is rejected by a CHECK constraint, confirm the allowed values. */
 export const NEW_RESERVATION_STATUS = "Pending";
 export const NEW_RESERVATION_SOURCE = "Website";
+
+/** Status written when a manager cancels a reservation from the admin area.
+ *  Capitalised to match the live system's convention; lowercased it already
+ *  hits `NON_BLOCKING_RESERVATION_STATUSES`, so cancelling frees the dates. */
+export const CANCELLED_RESERVATION_STATUS = "Cancelled";
 
 export function isRoomLive(status: string | null | undefined): boolean {
   if (!status) return true;

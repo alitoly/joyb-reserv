@@ -1,9 +1,11 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { RoomListing } from "@/lib/types";
-import { FACILITY_LABELS } from "@/lib/rooms";
-import { ButtonLink } from "./ui";
+import { FACILITY_LABELS, roomSizeForType } from "@/lib/rooms";
+import { buttonClass } from "./ui";
 
-/** Card for a single room loaded from the database. */
+/** Card for a single room loaded from the database. The whole card links to the
+ *  room's details page, where guests can see everything and book. */
 export function RoomCard({
   room,
   priority = false,
@@ -12,7 +14,11 @@ export function RoomCard({
   priority?: boolean;
 }) {
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-3xl bg-surface shadow-[0_1px_3px_rgba(29,32,32,0.06)] ring-1 ring-charcoal/5 transition-shadow duration-300 hover:shadow-[0_18px_40px_-18px_rgba(29,32,32,0.35)]">
+    <Link
+      href={`/rooms/${room.id}`}
+      className="group flex h-full flex-col overflow-hidden rounded-3xl bg-surface shadow-[0_1px_3px_rgba(29,32,32,0.06)] ring-1 ring-charcoal/5 transition-shadow duration-300 hover:shadow-[0_18px_40px_-18px_rgba(29,32,32,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+      aria-label={`View ${room.name} — $${room.priceUsd} per night`}
+    >
       <div className="relative aspect-[4/3] overflow-hidden">
         <Image
           src={room.imageUrl}
@@ -30,13 +36,13 @@ export function RoomCard({
       <div className="flex flex-1 flex-col p-6">
         <h3 className="font-display text-2xl text-charcoal">{room.name}</h3>
         <p className="mt-1 text-sm text-ink-soft">
-          {room.capacity
-            ? `Sleeps ${room.capacity} - ${room.typeName}`
-            : room.typeName}
+          {room.capacity ? `Sleeps ${room.capacity}` : room.typeName}
+          {" · "}
+          {roomSizeForType(room.typeName)}
         </p>
 
         <ul className="mt-4 flex flex-wrap gap-2">
-          {FACILITY_LABELS.map((f) => (
+          {FACILITY_LABELS.slice(0, 4).map((f) => (
             <li
               key={f}
               className="rounded-full bg-sand-deep px-3 py-1 text-xs font-medium text-charcoal/75"
@@ -51,11 +57,13 @@ export function RoomCard({
             <span className="font-display text-2xl">${room.priceUsd}</span>
             <span className="text-sm text-ink-soft"> / night</span>
           </p>
-          <ButtonLink href={`/book?room=${room.id}`} variant="primary">
-            Book
-          </ButtonLink>
+          {/* Non-interactive affordance — the whole card is the link. */}
+          <span className={buttonClass("primary", "pointer-events-none")}>
+            View room
+            <span aria-hidden="true">→</span>
+          </span>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

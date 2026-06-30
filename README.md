@@ -1,6 +1,6 @@
 # JoyB Resort
 
-Booking website for JoyB Resort, a small beachfront resort in Jambiani, Zanzibar.
+Booking website for JoyB Resort, a small garden resort in the heart of Zanzibar, minutes from the airport.
 Built with Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, and
 Supabase for reservations.
 
@@ -41,6 +41,19 @@ Live availability and booking require the env vars below.
   on the server, picks a free physical room, and inserts a `pending` / `website` booking.
 - A Postgres exclusion constraint makes it physically impossible to double-book the same
   room for overlapping dates, even under a race.
+
+## Accounts & admin
+
+- **Guests** can self-register at `/signup` (Supabase Auth) and see their own
+  reservations at `/account` (matched by the email they booked with). Booking still
+  works anonymously — an account is optional.
+- **Managers** are the emails listed in `MANAGER_EMAILS` (comma-separated, **required**
+  for admin access — an empty list means *no* admins). They get `/admin/reservations`
+  (list) and `/admin/manage` (a calendar of every booking, with the ability to cancel
+  any reservation). Cancelling sets the status to `Cancelled`, which also frees the
+  dates for re-booking.
+- Enable Email auth in the Supabase dashboard. If email confirmation is on, new
+  signups must confirm via email before signing in.
 
 ## Reception / local system sync
 

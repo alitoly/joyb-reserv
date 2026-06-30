@@ -6,26 +6,27 @@ import { ButtonLink, Kicker, Section } from "@/components/ui";
 export const metadata: Metadata = {
   title: "Our story",
   description:
-    "JoyB Resort is a family-run beachfront hideaway in Jambiani, Zanzibar, built on warm Swahili hospitality and the slow blue of the Indian Ocean.",
+    "JoyB Resort is a family-run garden guesthouse in the heart of Zanzibar, minutes from the airport, built on warm Swahili hospitality.",
 };
 
+// Neutral placeholder imagery (non-coastal). Swap for real resort photos later.
 const aboutImg =
-  "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=1600&q=80";
+  "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=1600&q=80";
 const detailImg =
-  "https://images.unsplash.com/photo-1535827841776-24afc1e255ac?auto=format&fit=crop&w=1200&q=80";
+  "https://images.unsplash.com/photo-1593696140826-c58b021acf8b?auto=format&fit=crop&w=1200&q=80";
 
 const VALUES = [
   {
     title: "Swahili hospitality",
-    body: "Karibu means welcome, and we mean it. Our team is from the village next door, and they treat guests like family who came a long way.",
+    body: "Karibu means welcome, and we mean it. Our team is from the neighbourhood, and they treat guests like family who came a long way.",
   },
   {
     title: "Gentle on the island",
-    body: "Solar hot water, refillable glass bottles, and seafood bought each morning from Jambiani's fishermen. Small footprint, big flavour.",
+    body: "Solar hot water, refillable glass bottles, and produce from the local market each morning. Small footprint, big flavour.",
   },
   {
     title: "Just 17 rooms",
-    body: "We kept JoyB intimate on purpose. With only 17 rooms across four types, mornings stay quiet, the sand stays uncrowded, and there's time to learn your name.",
+    body: "We kept JoyB intimate on purpose. With only 17 rooms across four types, mornings stay quiet, the garden stays calm, and there's time to learn your name.",
   },
 ];
 
@@ -35,7 +36,7 @@ export default function AboutPage() {
       <section className="relative isolate min-h-[58vh] w-full overflow-hidden">
         <Image
           src={aboutImg}
-          alt="Wooden dhow boat resting on white sand at low tide under a wide Zanzibar sky"
+          alt="A large leafy tree with sunlight filtering through its canopy"
           fill
           priority
           sizes="100vw"
@@ -49,7 +50,7 @@ export default function AboutPage() {
           <div className="max-w-2xl text-sand">
             <p className="font-medium tracking-wide text-gold">Our story</p>
             <h1 className="mt-3 font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.04] text-white">
-              A little place on a long white beach
+              A little garden guesthouse in Zanzibar
             </h1>
           </div>
         </Section>
@@ -57,23 +58,22 @@ export default function AboutPage() {
 
       <Section className="py-16 sm:py-24" width="narrow">
         <Reveal>
-          <Kicker>Jambiani, Zanzibar</Kicker>
+          <Kicker>In the heart of Zanzibar</Kicker>
           <p className="mt-6 text-xl leading-relaxed text-charcoal">
-            JoyB began as a family home on the east coast of Zanzibar, where the
-            tide pulls back half a kilometre each morning and the village wakes to
-            the sound of fishermen pushing out.
+            JoyB began as a family home in the green heart of Zanzibar, a short
+            drive from the airport and the lanes of Stone Town.
           </p>
           <p className="mt-5 leading-relaxed text-ink-soft">
-            Over the years we grew to 17 rooms, a shaded terrace, and a kitchen
-            that smells of cardamom and grilled fish. We never wanted a big hotel.
-            We wanted a place where you could put your phone down, feel the sand
-            warm under your feet, and remember what unhurried feels like. That’s
-            still the whole idea.
+            Over the years we grew to 17 rooms, a shaded garden terrace, and a
+            kitchen that smells of cardamom and fresh coffee. We never wanted a
+            big hotel. We wanted a quiet, green place where you could put your
+            phone down and remember what unhurried feels like. That’s still the
+            whole idea.
           </p>
           <p className="mt-5 leading-relaxed text-ink-soft">
             Today JoyB is still run by the same family, with a team from the
-            village who know the reef, the best hour for a dhow trip, and exactly
-            how you like your morning coffee by day three.
+            neighbourhood who know the island, the best route into town, and
+            exactly how you like your morning coffee by day three.
           </p>
         </Reveal>
       </Section>
@@ -83,7 +83,7 @@ export default function AboutPage() {
           <Reveal className="relative aspect-[4/3] overflow-hidden rounded-3xl">
             <Image
               src={detailImg}
-              alt="Breakfast of tropical fruit and spiced tea laid out on a sunlit terrace table"
+              alt="A calm, bright sitting room with simple, comfortable furniture"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
