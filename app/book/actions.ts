@@ -5,7 +5,7 @@ import { isRoomAvailable } from "@/lib/bookings";
 import { getRoom } from "@/lib/rooms-data";
 import { isValidISODate, nightsBetween, todayISO } from "@/lib/dates";
 import { NEW_RESERVATION_SOURCE, NEW_RESERVATION_STATUS } from "@/lib/types";
-import { sendReservationEmail } from "@/lib/email";
+import { sendGuestConfirmationEmail, sendReservationEmail } from "@/lib/email";
 
 /** Upper bound on guests when a room's capacity isn't known from the DB. */
 const MAX_GUESTS_FALLBACK = 6;
@@ -159,24 +159,29 @@ export async function createBooking(
 
   const reference = `JB${String(data.id).padStart(5, "0")}`;
 
-  // Notify the manager so they can confirm with the guest. Best-effort: a mail
+  // Notify the manager and confirm with the guest. Best-effort: a mail
   // failure must never fail a booking that was already saved.
-  try {
-    await sendReservationEmail({
-      reference,
-      roomName: room.name,
-      checkIn,
-      checkOut,
-      nights,
-      guests,
-      guestName,
-      guestEmail,
-      guestPhone,
-      totalUsd: totalAmount,
-      notes: message || null,
-    });
-  } catch (mailError) {
-    console.error("reservation email failed:", mailError);
+  const emailPayload = {
+    reference,
+    roomName: room.name,
+    checkIn,
+    checkOut,
+    nights,
+    guests,
+    guestName,
+    guestEmail,
+    guestPhone,
+    totalUsd: totalAmount,
+    notes: message || null,
+  };
+  const mailResults = await Promise.allSettled([
+    sendReservationEmail(emailPayload),
+    sendGuestConfirmationEmail(emailPayload),
+  ]);
+  for (const result of mailResults) {
+    if (result.status === "rejected") {
+      console.error("reservation email failed:", result.reason);
+    }
   }
 
   return {
