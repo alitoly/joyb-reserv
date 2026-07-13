@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { createBooking, type BookingState } from "@/app/book/actions";
-import type { BookedRange, RoomListing } from "@/lib/types";
+import type { RoomListing } from "@/lib/types";
 import { addDays, formatLong, nightsBetween, todayISO } from "@/lib/dates";
 import { Button } from "./ui";
 import { AvailabilityBanner, type AvailState } from "./availability-banner";
@@ -25,10 +25,11 @@ const MAX_GUESTS_FALLBACK = 6;
 const initialState: BookingState = { status: "idle" };
 
 /**
- * Single-room booking form embedded on the room details page. The room is
- * fixed (no picker), so the flow is just: dates → guests → your details. Live
- * availability is checked against `/api/availability`; the server action
- * re-validates everything before writing.
+ * Booking form embedded on the room-type details page. The type is fixed (no
+ * picker), so the flow is just: dates → guests → your details. The server
+ * assigns any free physical room from the type's pool. Live pool availability
+ * is checked against `/api/availability`; the server action re-validates
+ * everything (and re-assigns a room) before writing.
  */
 /** Pre-fill values for a signed-in guest (no field is required). */
 export interface GuestDefaults {
@@ -53,7 +54,6 @@ export function RoomBookingForm({
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [avail, setAvail] = useState<AvailState>({ kind: "idle" });
-  const [ranges, setRanges] = useState<BookedRange[]>([]);
 
   const maxGuests = room.capacity && room.capacity > 0
     ? room.capacity
@@ -73,7 +73,7 @@ export function RoomBookingForm({
     if (checkOut && checkOut <= value) setCheckOut(addDays(value, 1));
   }
 
-  // Fetch availability + booked ranges (debounced) when dates change.
+  // Fetch pool availability (debounced) when dates change.
   useEffect(() => {
     const controller = new AbortController();
     const params = new URLSearchParams({ room: room.id });
@@ -89,7 +89,6 @@ export function RoomBookingForm({
           signal: controller.signal,
         });
         const json = await res.json();
-        setRanges(json.ranges ?? []);
         if (!json.configured) {
           setAvail({ kind: "unconfigured" });
         } else if (json.availability) {
@@ -175,6 +174,7 @@ export function RoomBookingForm({
       className="rounded-[2rem] bg-surface p-6 ring-1 ring-charcoal/5 sm:p-9"
       noValidate
     >
+      {/* room.id is a room-TYPE id — the server assigns a specific physical room. */}
       <input type="hidden" name="room" value={room.id} />
 
       {/* Form-level error */}
@@ -243,8 +243,8 @@ export function RoomBookingForm({
           </div>
         </div>
 
-        {/* Availability feedback for this room */}
-        <AvailabilityBanner avail={avail} ranges={ranges} />
+        {/* Availability feedback for this room type */}
+        <AvailabilityBanner avail={avail} />
 
         {/* Guests */}
         <div className="sm:max-w-[12rem]">

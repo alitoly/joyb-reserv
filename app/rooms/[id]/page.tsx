@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getRoom } from "@/lib/rooms-data";
+import { getRoomType } from "@/lib/rooms-data";
 import { facilitiesForType, roomSizeForType } from "@/lib/rooms";
 import { getServerSupabase } from "@/lib/supabase-server";
 import { getSessionUser } from "@/lib/supabase-auth-server";
@@ -24,13 +24,13 @@ export async function generateMetadata({
   params: Params;
 }): Promise<Metadata> {
   const { id } = await params;
-  const room = await getRoom(id);
+  const room = await getRoomType(id);
   if (!room) return { title: "Room not found" };
   return {
-    title: `${room.name} — ${room.typeName}`,
+    title: `${room.name} Room`,
     description:
       room.description ??
-      `Book ${room.name}, a ${room.typeName.toLowerCase()} at JoyB Resort Zanzibar from $${room.priceUsd} per night.`,
+      `Book a ${room.name.toLowerCase()} room at JoyB Resort Zanzibar from $${room.priceUsd} per night.`,
   };
 }
 
@@ -64,7 +64,7 @@ export default async function RoomDetailsPage({
   params: Params;
 }) {
   const { id } = await params;
-  const room = await getRoom(id);
+  const room = await getRoomType(id);
   if (!room) notFound();
 
   const defaultGuest = await guestDefaults();
@@ -87,14 +87,18 @@ export default async function RoomDetailsPage({
         {/* Left: gallery + details */}
         <div>
           <Reveal>
-            <Kicker>{room.typeName}</Kicker>
+            <Kicker>Room type</Kicker>
             <h1 className="mt-3 text-[clamp(2rem,4vw,3.25rem)] leading-[1.05] text-charcoal">
-              {room.name}
+              {room.name} Room
             </h1>
             <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-ink-soft">
               {room.capacity && <span>Sleeps {room.capacity}</span>}
               {room.capacity && <span aria-hidden="true">·</span>}
               <span>{size}</span>
+              <span aria-hidden="true">·</span>
+              <span>
+                {room.totalRooms} {room.totalRooms === 1 ? "room" : "rooms"} of this type
+              </span>
               <span aria-hidden="true">·</span>
               <span className="text-charcoal">
                 <span className="font-display text-xl">${room.priceUsd}</span> /
@@ -170,7 +174,7 @@ export default async function RoomDetailsPage({
         <div className="lg:sticky lg:top-28 lg:self-start">
           <Reveal delay={100}>
             <h2 className="mb-4 font-display text-2xl text-charcoal">
-              Book this room
+              Book this room type
             </h2>
             <RoomBookingForm room={room} defaultGuest={defaultGuest} />
           </Reveal>

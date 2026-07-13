@@ -45,28 +45,36 @@ dynamically per-room (not hardcoded, not grouped by type).
    all Supabase calls happen in Server Components / Route Handlers / Server Actions and
    select non-PII columns. When env vars are absent, helpers return `null`/`[]` and the
    app degrades gracefully.
-2. **Room listing** (`lib/rooms-data.ts`): `listRooms()` / `getRoom(id)` join
-   `rooms → room_types(name), room_images(image_path)` into the `RoomListing`
-   view-model. Live columns: `rooms.name` (NOT `room_name`), `day_payment` is the
-   nightly price, `rooms.max_pax` is capacity (the `pax` table is a guest
-   registry, not capacity). Run `node scripts/check-db-schema.mjs` when queries
-   start failing — the reception developer has renamed columns before.
-3. **Availability** (`lib/bookings.ts`): per-room. A room is unavailable when a
-   blocking `reservations` row overlaps `[checkIn, checkOut)` (overlap rule
-   `existing.check_in_date < new.check_out AND existing.check_out_date > new.check_in`),
-   or — when `CONSIDER_TENANT_OCCUPANCY` — a long-term `tenants` occupancy overlaps.
-   Reads all reservations regardless of `source`, so front-desk bookings block the site.
+2. **Room listing is by TYPE, not physical room** (`lib/rooms-data.ts`): `listRooms()` /
+   `getRoomType(id)` fetch all `rooms` rows joined with `room_types(name, description,
+   max_pax)` and `room_images(image_path)`, then group by `room_type_id` into one
+   `RoomListing` per type (`groupByType`). `id` on a `RoomListing` is a **room_type_id**,
+   not a `rooms.id`. `priceUsd` is the lowest `day_payment` among the type's live rooms;
+   `totalRooms` is the pool size. Live columns: `rooms.name` (NOT `room_name`),
+   `rooms.max_pax`/`room_types.max_pax` for capacity (the `pax` table is a guest
+   registry, not capacity). Run `node scripts/check-db-schema.mjs` when queries start
+   failing — the reception developer has renamed columns before.
+3. **Availability is pool-based** (`lib/bookings.ts` `isTypeAvailable`): given a
+   room-type id + dates, it fetches all live physical rooms of that type, finds which
+   ones have a blocking `reservations` row overlapping `[checkIn, checkOut)` (overlap
+   rule `existing.check_in_date < new.check_out AND existing.check_out_date >
+   new.check_in`) or — when `CONSIDER_TENANT_OCCUPANCY` — a long-term `tenants`
+   occupancy overlap, and returns one free physical room to assign plus free/total
+   counts. The type only shows "sold out" once every physical room is blocked. Reads
+   all reservations regardless of `notes` tag, so front-desk bookings block the site.
 4. **Status rules are centralised in `lib/types.ts`** (`HIDDEN_ROOM_STATUSES`,
    `NON_BLOCKING_RESERVATION_STATUSES`, `NON_BLOCKING_TENANT_STATUSES`,
    `NEW_RESERVATION_STATUS`, `WEBSITE_NOTES_TAG`). They are lenient for display and conservative for
    availability; **confirm the real status strings with the reception-system developer**
    and adjust them in that one place.
 5. `app/book/actions.ts` (`"use server"`) re-validates every field, re-checks
-   `isRoomAvailable`, computes `total_amount = day_payment × nights`, and inserts into
-   `reservations`. The live table has **no `source` column** — website bookings are
-   tagged with `WEBSITE_NOTES_TAG` inside `notes` instead. It treats a Postgres `23P01`
-   (exclusion_violation) as "just taken" — relevant only if the DB has a double-booking
-   exclusion constraint (confirm; add one if missing).
+   `isTypeAvailable`, computes `total_amount = (lowest) day_payment × nights`, and
+   inserts into `reservations` against the assigned physical `room_id`. The live table
+   has **no `source` column** — website bookings are tagged with `WEBSITE_NOTES_TAG`
+   inside `notes` instead. A Postgres `23P01` (exclusion_violation) means another
+   booking just took that specific physical room in a race; the action re-checks the
+   pool and retries with the next free room (up to `MAX_ASSIGN_ATTEMPTS`) before
+   reporting the type sold out.
 
 **Auth (`lib/supabase-auth*.ts`, `proxy.ts`):** Supabase Auth (anon key, `NEXT_PUBLIC_`)
 powers two roles. Guests self-signup at `/signup` and see their own bookings at

@@ -4,8 +4,9 @@ import type { RoomListing } from "@/lib/types";
 import { FACILITY_LABELS, roomSizeForType } from "@/lib/rooms";
 import { buttonClass } from "./ui";
 
-/** Card for a single room loaded from the database. The whole card links to the
- *  room's details page, where guests can see everything and book. */
+/** Card for a room TYPE loaded from the database. The whole card links to the
+ *  type's details page, where guests pick dates and the server auto-assigns
+ *  any free physical room from that type's pool. */
 export function RoomCard({
   room,
   priority = false,
@@ -17,7 +18,7 @@ export function RoomCard({
     <Link
       href={`/rooms/${room.id}`}
       className="group flex h-full flex-col overflow-hidden rounded-3xl bg-surface shadow-[0_1px_3px_rgba(29,32,32,0.06)] ring-1 ring-charcoal/5 transition-shadow duration-300 hover:shadow-[0_18px_40px_-18px_rgba(29,32,32,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
-      aria-label={`View ${room.name} — $${room.priceUsd} per night`}
+      aria-label={`View ${room.name} Room — $${room.priceUsd} per night`}
     >
       <div className="relative aspect-[4/3] overflow-hidden">
         <Image
@@ -29,12 +30,12 @@ export function RoomCard({
           className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
         />
         <span className="absolute left-4 top-4 rounded-full bg-sand/95 px-3 py-1 text-xs font-semibold text-charcoal">
-          {room.typeName}
+          {room.totalRooms} {room.totalRooms === 1 ? "room" : "rooms"}
         </span>
       </div>
 
       <div className="flex flex-1 flex-col p-6">
-        <h3 className="font-display text-2xl text-charcoal">{room.name}</h3>
+        <h3 className="font-display text-2xl text-charcoal">{room.name} Room</h3>
         <p className="mt-1 text-sm text-ink-soft">
           {room.capacity ? `Sleeps ${room.capacity}` : room.typeName}
           {" · "}

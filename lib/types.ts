@@ -1,33 +1,34 @@
 /** Shared domain types for JoyB Resort, aligned to the live reservation DB. */
 
 /**
- * A room as the website displays and books it (view-model — no PII).
- * Built in `lib/rooms-data.ts` by joining `rooms` → `room_types`,
- * `room_images`.
+ * A room TYPE as the website displays and books it (view-model — no PII).
+ * The site books by type, not by physical room: guests pick a type + dates,
+ * and the server assigns any free physical room from that type's pool. Built
+ * in `lib/rooms-data.ts` by grouping `rooms` rows by `room_type_id` and
+ * joining `room_types`, `room_images`.
  */
 export interface RoomListing {
-  id: string; // rooms.id (stringified)
-  name: string; // rooms.name
-  typeName: string; // room_types.name
-  capacity: number | null; // rooms.max_pax
-  priceUsd: number; // rooms.day_payment (per night)
-  description: string | null; // rooms.description
+  id: string; // room_types.id (stringified)
+  name: string; // room_types.name
+  typeName: string; // same as `name` — kept as a separate field since callers
+  // (Kicker, facilitiesForType, meta titles) key off "type"
+  capacity: number | null; // room_types.max_pax (falls back to the highest rooms.max_pax among members)
+  priceUsd: number; // lowest rooms.day_payment among this type's live rooms
+  description: string | null; // room_types.description (falls back to a member room's description)
   imageUrl: string; // first resolved Storage/public URL (or fallback)
   images: string[]; // all resolved image URLs (gallery); always ≥ 1 (fallback)
   imageAlt: string;
+  totalRooms: number; // count of live physical rooms of this type — the pool size
 }
 
-/** Blocked date range surfaced to the booking form for hints (no PII). */
-export interface BookedRange {
-  check_in: string; // YYYY-MM-DD
-  check_out: string; // YYYY-MM-DD (exclusive)
-}
-
-/** Result of an availability lookup for one room + date range. */
+/** Result of an availability lookup for a room TYPE + date range. `freeCount`/
+ *  `totalCount` are omitted when unknown (e.g. dates not yet chosen). */
 export interface AvailabilityResult {
   configured: boolean; // false when the DB env vars are missing
   available: boolean;
   message: string;
+  freeCount?: number;
+  totalCount?: number;
 }
 
 // ---------------------------------------------------------------------------

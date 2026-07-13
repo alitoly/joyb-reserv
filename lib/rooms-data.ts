@@ -11,27 +11,33 @@ import { FALLBACK_ROOM_IMAGE } from "./rooms";
 const ROOM_IMAGE_BASE_URL = process.env.ROOM_IMAGE_BASE_URL?.replace(/\/+$/, "");
 
 /**
- * Reads the room catalogue from the live database and shapes it into the
- * `RoomListing` view-model the UI loops over. Server-only (uses the
- * service-role client). Selects non-PII columns and joins the type, capacity
- * and image tables.
+ * Reads the room catalogue from the live database and shapes it into
+ * `RoomListing` view-models — one per room TYPE, not per physical room. The
+ * site books by type: guests pick a type + dates, and the server assigns any
+ * free physical room from that type's pool (see `lib/bookings.ts`
+ * `isTypeAvailable`). Server-only (uses the service-role client).
  */
 
-interface RoomJoinRow {
+interface RoomRow {
   id: number;
   name: string | null;
   day_payment: number | null;
   status: string | null;
   description: string | null;
   max_pax: number | null;
-  room_types: { name: string | null } | null;
+  room_type_id: number | null;
+  room_types: {
+    name: string | null;
+    description: string | null;
+    max_pax: number | null;
+  } | null;
   room_images: { image_path: string | null }[] | null;
 }
 
 // Live schema: rooms.name (not room_name), capacity on rooms.max_pax (the
 // `pax` table is a guest registry, not capacity). See scripts/check-db-schema.mjs.
 const SELECT =
-  "id, name, day_payment, status, description, max_pax, room_types(name), room_images(image_path)";
+  "id, name, day_payment, status, description, max_pax, room_type_id, room_types(name, description, max_pax), room_images(image_path)";
 
 /** Resolve an `image_path` to a usable URL: pass through full URLs, prefix a
  *  relative path with ROOM_IMAGE_BASE_URL when configured, otherwise fall back. */
@@ -44,30 +50,68 @@ function resolveImageUrl(path: string | null | undefined): string {
   return FALLBACK_ROOM_IMAGE;
 }
 
-function toListing(r: RoomJoinRow): RoomListing {
-  const name = r.name?.trim() || `Room ${r.id}`;
-  const typeName = r.room_types?.name?.trim() || "Room";
-  // Resolve every image_path into a usable URL for the gallery. Always keep at
-  // least one entry so the details page never renders an empty gallery.
-  const resolved = (r.room_images ?? [])
-    .map((img) => img?.image_path)
-    .filter((p): p is string => Boolean(p && p.trim()))
-    .map(resolveImageUrl);
-  const images = resolved.length > 0 ? resolved : [resolveImageUrl(null)];
-  return {
-    id: String(r.id),
-    name,
-    typeName,
-    capacity: r.max_pax ?? null,
-    priceUsd: Number(r.day_payment ?? 0),
-    description: r.description?.trim() || null,
-    imageUrl: images[0],
-    images,
-    imageAlt: `${name} - ${typeName} at JoyB Resort`,
-  };
+/** Group live physical rooms by `room_type_id` into one RoomListing per type. */
+function groupByType(rows: RoomRow[]): RoomListing[] {
+  const liveRows = rows.filter((r) => isRoomLive(r.status) && r.room_type_id != null);
+
+  const byType = new Map<number, RoomRow[]>();
+  for (const r of liveRows) {
+    const typeId = r.room_type_id as number;
+    const members = byType.get(typeId);
+    if (members) members.push(r);
+    else byType.set(typeId, [r]);
+  }
+
+  const listings: RoomListing[] = [];
+  for (const [typeId, members] of byType) {
+    const first = members[0];
+    const typeName = first.room_types?.name?.trim() || "Room";
+
+    const description =
+      first.room_types?.description?.trim() ||
+      members.map((m) => m.description?.trim()).find(Boolean) ||
+      null;
+
+    const memberCapacities = members
+      .map((m) => m.max_pax)
+      .filter((n): n is number => typeof n === "number" && n > 0);
+    const capacity =
+      first.room_types?.max_pax && first.room_types.max_pax > 0
+        ? first.room_types.max_pax
+        : memberCapacities.length > 0
+          ? Math.max(...memberCapacities)
+          : null;
+
+    const prices = members
+      .map((m) => Number(m.day_payment ?? 0))
+      .filter((p) => p > 0);
+    const priceUsd = prices.length > 0 ? Math.min(...prices) : 0;
+
+    const resolved = members
+      .flatMap((m) => m.room_images ?? [])
+      .map((img) => img?.image_path)
+      .filter((p): p is string => Boolean(p && p.trim()))
+      .map(resolveImageUrl);
+    const images = resolved.length > 0 ? resolved : [resolveImageUrl(null)];
+
+    listings.push({
+      id: String(typeId),
+      name: typeName,
+      typeName,
+      capacity,
+      priceUsd,
+      description,
+      imageUrl: images[0],
+      images,
+      imageAlt: `${typeName} at JoyB Resort`,
+      totalRooms: members.length,
+    });
+  }
+
+  return listings.sort((a, b) => a.priceUsd - b.priceUsd);
 }
 
-/** All live, bookable rooms — the source the room grid loops over. */
+/** Every bookable room type — the source the room grid loops over. */
 export async function listRooms(): Promise<RoomListing[]> {
   const supabase = getServerSupabase();
   if (!supabase) return [];
@@ -82,13 +126,12 @@ export async function listRooms(): Promise<RoomListing[]> {
     return [];
   }
 
-  return (data as unknown as RoomJoinRow[])
-    .filter((r) => isRoomLive(r.status))
-    .map(toListing);
+  return groupByType(data as unknown as RoomRow[]);
 }
 
-/** A single room by id, for the booking page. */
-export async function getRoom(id: string): Promise<RoomListing | null> {
+/** A single room type by id, for the booking page. Null if the type has no
+ *  live physical rooms (nothing bookable). */
+export async function getRoomType(id: string): Promise<RoomListing | null> {
   const supabase = getServerSupabase();
   if (!supabase) return null;
 
@@ -98,12 +141,12 @@ export async function getRoom(id: string): Promise<RoomListing | null> {
   const { data, error } = await supabase
     .from("rooms")
     .select(SELECT)
-    .eq("id", numId)
-    .maybeSingle();
+    .eq("room_type_id", numId);
 
   if (error || !data) {
-    if (error) console.error("getRoom failed:", error.message);
+    if (error) console.error("getRoomType failed:", error.message);
     return null;
   }
-  return toListing(data as unknown as RoomJoinRow);
+
+  return groupByType(data as unknown as RoomRow[])[0] ?? null;
 }

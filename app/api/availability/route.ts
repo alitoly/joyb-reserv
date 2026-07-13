@@ -1,37 +1,44 @@
 import { NextResponse } from "next/server";
-import { getRoomBlockingRanges, isRoomAvailable } from "@/lib/bookings";
+import { isTypeAvailable } from "@/lib/bookings";
 import { isSupabaseConfigured } from "@/lib/supabase-server";
 import { isValidISODate } from "@/lib/dates";
-import { getRoom } from "@/lib/rooms-data";
+import { getRoomType } from "@/lib/rooms-data";
 
 /**
- * GET /api/availability?room=<roomId>&checkIn=YYYY-MM-DD&checkOut=YYYY-MM-DD
+ * GET /api/availability?room=<roomTypeId>&checkIn=YYYY-MM-DD&checkOut=YYYY-MM-DD
  *
- * Returns the room's upcoming blocking date ranges (for UI hints) and — when
- * both valid dates are supplied — the authoritative availability for that room
- * and range. Reflects all reservations regardless of source.
+ * `room` is a room-TYPE id (the site books by type, not physical room). When
+ * both valid dates are supplied, returns the authoritative pool availability
+ * for that type — free/total room counts, never "sold out" until every
+ * physical room of the type is booked for the range.
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const roomId = searchParams.get("room") ?? "";
+  const roomTypeId = searchParams.get("room") ?? "";
   const checkIn = searchParams.get("checkIn") ?? "";
   const checkOut = searchParams.get("checkOut") ?? "";
 
   if (!isSupabaseConfigured) {
-    return NextResponse.json({ configured: false, ranges: [], availability: null });
+    return NextResponse.json({ configured: false, availability: null });
   }
 
-  const room = await getRoom(roomId);
-  if (!room) {
-    return NextResponse.json({ error: "Unknown room." }, { status: 400 });
+  const roomType = await getRoomType(roomTypeId);
+  if (!roomType) {
+    return NextResponse.json({ error: "Unknown room type." }, { status: 400 });
   }
-
-  const ranges = await getRoomBlockingRanges(roomId);
 
   let availability = null;
   if (isValidISODate(checkIn) && isValidISODate(checkOut) && checkOut > checkIn) {
-    availability = await isRoomAvailable(roomId, checkIn, checkOut);
+    const result = await isTypeAvailable(roomTypeId, checkIn, checkOut);
+    // Strip server-only fields (roomId/roomName) before returning to the client.
+    availability = {
+      configured: result.configured,
+      available: result.available,
+      message: result.message,
+      freeCount: result.freeCount,
+      totalCount: result.totalCount,
+    };
   }
 
-  return NextResponse.json({ configured: true, ranges, availability });
+  return NextResponse.json({ configured: true, availability });
 }

@@ -21,14 +21,18 @@ const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-// Every read the site performs, with the file that owns it.
+// Every read the site performs, with the file that owns it. The site books by
+// room TYPE (pool of physical rooms per type) — see lib/rooms-data.ts and
+// lib/bookings.ts isTypeAvailable.
 const READS = [
-  ["lib/rooms-data.ts listRooms/getRoom", "rooms",
-    "id, name, day_payment, status, description, max_pax, room_types(name), room_images(image_path)"],
+  ["lib/rooms-data.ts listRooms/getRoomType", "rooms",
+    "id, name, day_payment, status, description, max_pax, room_type_id, room_types(name, description, max_pax), room_images(image_path)"],
+  ["lib/bookings.ts liveRoomsForType (pool)", "rooms",
+    "id, name, status"],
   ["lib/bookings.ts reservations overlap", "reservations",
-    "status, check_in_date, check_out_date"],
+    "room_id, status, check_in_date, check_out_date"],
   ["lib/bookings.ts tenants occupancy", "tenants",
-    "status, check_in, check_out"],
+    "room_id, status, check_in, check_out"],
   ["app/account bookings list", "reservations",
     "id, check_in_date, check_out_date, status, total_amount, created_at, rooms(name)"],
   ["app/admin/reservations list", "reservations",

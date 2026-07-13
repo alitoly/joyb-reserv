@@ -1,11 +1,10 @@
 "use client";
 
-import type { AvailabilityResult, BookedRange } from "@/lib/types";
-import { formatLong } from "@/lib/dates";
+import type { AvailabilityResult } from "@/lib/types";
 import { AlertIcon, CheckIcon, SpinnerIcon } from "./icons";
 
-/** Live availability state for the selected room + dates, shared by the booking
- *  forms. `unconfigured` means the DB env vars are missing on the server. */
+/** Live availability state for the selected room type + dates. `unconfigured`
+ *  means the DB env vars are missing on the server. */
 export type AvailState =
   | { kind: "idle" }
   | { kind: "checking" }
@@ -13,15 +12,9 @@ export type AvailState =
   | { kind: "unconfigured" }
   | { kind: "error" };
 
-/** Inline availability feedback (checking / available / sold out + booked
- *  ranges). Used by both the multi-room and single-room booking forms. */
-export function AvailabilityBanner({
-  avail,
-  ranges,
-}: {
-  avail: AvailState;
-  ranges: BookedRange[];
-}) {
+/** Inline availability feedback (checking / available (free of pool) / sold
+ *  out) for the booking form. */
+export function AvailabilityBanner({ avail }: { avail: AvailState }) {
   return (
     <div aria-live="polite" className="min-h-[1.5rem]">
       {avail.kind === "checking" && (
@@ -56,18 +49,6 @@ export function AvailabilityBanner({
               <AlertIcon className="h-5 w-5 shrink-0" />
               {avail.data.message}
             </p>
-            {ranges.length > 0 && (
-              <p className="mt-2 text-xs text-rust-strong/80">
-                Already booked:{" "}
-                {ranges
-                  .slice(0, 4)
-                  .map(
-                    (r) =>
-                      `${formatLong(r.check_in)} – ${formatLong(r.check_out)}`,
-                  )
-                  .join(" · ")}
-              </p>
-            )}
           </div>
         ))}
     </div>
