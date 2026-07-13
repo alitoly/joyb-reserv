@@ -47,7 +47,8 @@ const READS = [
 const WRITE_COLUMNS = {
   reservations: [
     "room_id", "tenant_name", "tenant_email", "tenant_phone",
-    "check_in_date", "check_out_date", "status", "total_amount", "notes",
+    "check_in_date", "check_out_date", "status", "total_amount",
+    "reference_number", "notes",
   ],
 };
 
@@ -72,12 +73,33 @@ const spec = await (
 ).json();
 
 for (const [table, cols] of Object.entries(WRITE_COLUMNS)) {
-  const live = Object.keys(spec.definitions?.[table]?.properties ?? {});
-  const missing = cols.filter((c) => !live.includes(c));
+  const def = spec.definitions?.[table];
+  const liveProps = def?.properties ?? {};
+  const live = Object.keys(liveProps);
+  const required = def?.required ?? [];
+  // Primary keys appear in `required` even when DB-generated (serial/identity)
+  // — the site never sets them, so exclude from the "did we cover it" check.
+  const pk = Object.entries(liveProps)
+    .filter(([, p]) => p.description?.includes("Primary Key"))
+    .map(([k]) => k);
+
+  const renamedOrMissing = cols.filter((c) => !live.includes(c));
   report(
-    `write columns on ${table}`,
-    live.length > 0 && missing.length === 0,
-    missing.length ? `missing: ${missing.join(", ")}` : "",
+    `write columns exist on ${table}`,
+    live.length > 0 && renamedOrMissing.length === 0,
+    renamedOrMissing.length ? `missing: ${renamedOrMissing.join(", ")}` : "",
+  );
+
+  // Catches columns the DB requires (NOT NULL, no default) that our insert
+  // doesn't set — e.g. reservations.reference_number, which silently broke
+  // every booking with "Something went wrong saving your booking."
+  const uncoveredRequired = required.filter((c) => !pk.includes(c) && !cols.includes(c));
+  report(
+    `required columns covered on ${table}`,
+    uncoveredRequired.length === 0,
+    uncoveredRequired.length
+      ? `NOT NULL with no default, but the insert doesn't set: ${uncoveredRequired.join(", ")}`
+      : "",
   );
 }
 

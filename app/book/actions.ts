@@ -42,6 +42,14 @@ function str(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
 }
 
+/** `reservations.reference_number` is required (NOT NULL, no default) but the
+ *  site never reads it back — the guest-facing reference is `JB<id>`,
+ *  computed after insert. Generate a cheap unique value just to satisfy the
+ *  column; regenerated per insert attempt in case it's uniquely constrained. */
+function generateReferenceNumber(): string {
+  return `WEB-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
 /**
  * Create a website reservation for a room TYPE.
  *
@@ -154,6 +162,7 @@ export async function createBooking(
         check_out_date: checkOut,
         status: NEW_RESERVATION_STATUS,
         total_amount: totalAmount,
+        reference_number: generateReferenceNumber(),
         notes,
       })
       .select("id")
