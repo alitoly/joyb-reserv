@@ -19,17 +19,19 @@ const ROOM_IMAGE_BASE_URL = process.env.ROOM_IMAGE_BASE_URL?.replace(/\/+$/, "")
 
 interface RoomJoinRow {
   id: number;
-  room_name: string | null;
+  name: string | null;
   day_payment: number | null;
   status: string | null;
   description: string | null;
+  max_pax: number | null;
   room_types: { name: string | null } | null;
-  pax: { value: number | null } | null;
   room_images: { image_path: string | null }[] | null;
 }
 
+// Live schema: rooms.name (not room_name), capacity on rooms.max_pax (the
+// `pax` table is a guest registry, not capacity). See scripts/check-db-schema.mjs.
 const SELECT =
-  "id, room_name, day_payment, status, description, room_types(name), pax(value), room_images(image_path)";
+  "id, name, day_payment, status, description, max_pax, room_types(name), room_images(image_path)";
 
 /** Resolve an `image_path` to a usable URL: pass through full URLs, prefix a
  *  relative path with ROOM_IMAGE_BASE_URL when configured, otherwise fall back. */
@@ -43,7 +45,7 @@ function resolveImageUrl(path: string | null | undefined): string {
 }
 
 function toListing(r: RoomJoinRow): RoomListing {
-  const name = r.room_name?.trim() || `Room ${r.id}`;
+  const name = r.name?.trim() || `Room ${r.id}`;
   const typeName = r.room_types?.name?.trim() || "Room";
   // Resolve every image_path into a usable URL for the gallery. Always keep at
   // least one entry so the details page never renders an empty gallery.
@@ -56,7 +58,7 @@ function toListing(r: RoomJoinRow): RoomListing {
     id: String(r.id),
     name,
     typeName,
-    capacity: r.pax?.value ?? null,
+    capacity: r.max_pax ?? null,
     priceUsd: Number(r.day_payment ?? 0),
     description: r.description?.trim() || null,
     imageUrl: images[0],

@@ -45,16 +45,19 @@ async function hasBlockingOverlap(
   if ((reservations ?? []).some((r) => reservationBlocks(r.status))) return true;
 
   if (CONSIDER_TENANT_OCCUPANCY) {
-    const { data: tenants } = await supabase
+    const { data: tenants, error: tenantError } = await supabase
       .from("tenants")
-      .select("status, move_in_date, move_out_date")
+      .select("status, check_in, check_out")
       .eq("room_id", numId)
-      .lt("move_in_date", checkOut);
+      .lt("check_in", checkOut);
 
+    if (tenantError) {
+      console.error("tenant occupancy read failed:", tenantError.message);
+    }
     const tenantOverlap = (tenants ?? []).some((t) => {
       if (!tenantBlocks(t.status)) return false;
-      // Open-ended tenancy (no move-out) blocks everything from move-in on.
-      return !t.move_out_date || t.move_out_date > checkIn;
+      // Open-ended tenancy (no check-out) blocks everything from check-in on.
+      return !t.check_out || t.check_out > checkIn;
     });
     if (tenantOverlap) return true;
   }

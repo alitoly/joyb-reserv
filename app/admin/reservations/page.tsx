@@ -4,7 +4,7 @@ import { getServerSupabase, isSupabaseConfigured } from "@/lib/supabase-server";
 import { getSessionUser } from "@/lib/supabase-auth-server";
 import { isManagerEmail } from "@/lib/supabase-auth";
 import { formatLong } from "@/lib/dates";
-import { reservationBlocks } from "@/lib/types";
+import { isWebsiteReservation, reservationBlocks } from "@/lib/types";
 import { signOut } from "@/app/admin/actions";
 import { AdminNav } from "@/components/admin-nav";
 import { CancelBookingForm } from "@/components/cancel-booking-form";
@@ -25,15 +25,14 @@ interface ReservationRow {
   check_in_date: string | null;
   check_out_date: string | null;
   status: string | null;
-  source: string | null;
   total_amount: number | null;
   notes: string | null;
   created_at: string | null;
-  rooms: { room_name: string | null } | null;
+  rooms: { name: string | null } | null;
 }
 
 const SELECT =
-  "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, source, total_amount, notes, created_at, rooms(room_name)";
+  "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, total_amount, notes, created_at, rooms(name)";
 
 async function loadReservations(): Promise<ReservationRow[]> {
   const supabase = getServerSupabase();
@@ -118,10 +117,10 @@ export default async function ReservationsPage() {
                     JB{String(r.id).padStart(5, "0")}
                   </td>
                   <td className="px-5 py-4 text-charcoal">
-                    {r.rooms?.room_name ?? "—"}
-                    {r.source && (
+                    {r.rooms?.name ?? "—"}
+                    {isWebsiteReservation(r.notes) && (
                       <span className="mt-1 block text-xs text-ink-soft">
-                        via {r.source}
+                        via Website
                       </span>
                     )}
                   </td>

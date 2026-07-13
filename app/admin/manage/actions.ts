@@ -30,14 +30,25 @@ export async function cancelReservation(
   const supabase = getServerSupabase();
   if (!supabase) return { ok: false, message: "Database unavailable." };
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("reservations")
     .update({ status: CANCELLED_RESERVATION_STATUS })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) {
     console.error("cancelReservation failed:", error.message);
-    return { ok: false, message: "Couldn't cancel — please try again." };
+    // Admin-only page: surface the real reason (e.g. a missing UPDATE grant
+    // on the shared reception DB) instead of a blind "try again".
+    return { ok: false, message: `Couldn't cancel: ${error.message}` };
+  }
+  // PostgREST reports no error when the update matched zero rows — without
+  // this check the UI would show "Cancelled" while the DB kept the booking.
+  if (!data || data.length === 0) {
+    return {
+      ok: false,
+      message: "Booking not found — refresh and try again.",
+    };
   }
 
   revalidatePath("/admin/manage");

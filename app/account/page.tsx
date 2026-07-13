@@ -23,11 +23,11 @@ interface BookingRow {
   status: string | null;
   total_amount: number | null;
   created_at: string | null;
-  rooms: { room_name: string | null } | null;
+  rooms: { name: string | null } | null;
 }
 
 const SELECT =
-  "id, check_in_date, check_out_date, status, total_amount, created_at, rooms(room_name)";
+  "id, check_in_date, check_out_date, status, total_amount, created_at, rooms(name)";
 
 /** Reservations belonging to this guest. The shared DB has no user_id, so we
  *  match on the email the booking was made with. */
@@ -114,7 +114,7 @@ export default async function AccountPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-display text-xl text-charcoal">
-                      {b.rooms?.room_name ?? "Room"}
+                      {b.rooms?.name ?? "Room"}
                     </p>
                     <p className="mt-0.5 font-mono text-xs text-ink-soft">
                       JB{String(b.id).padStart(5, "0")}

@@ -38,7 +38,7 @@ export default function ContactPage() {
         <Reveal className="max-w-3xl">
           <Kicker>Contact</Kicker>
           <h1 className="mt-4 text-[clamp(2.5rem,5vw,4rem)] leading-[1.05] text-charcoal">
-            We'd love to hear from you
+            We&apos;d love to hear from you
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft">
             Planning a stay, arranging an airport pickup, or just curious about

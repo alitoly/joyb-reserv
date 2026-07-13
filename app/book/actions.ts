@@ -4,7 +4,7 @@ import { getServerSupabase, isSupabaseConfigured } from "@/lib/supabase-server";
 import { isRoomAvailable } from "@/lib/bookings";
 import { getRoom } from "@/lib/rooms-data";
 import { isValidISODate, nightsBetween, todayISO } from "@/lib/dates";
-import { NEW_RESERVATION_SOURCE, NEW_RESERVATION_STATUS } from "@/lib/types";
+import { NEW_RESERVATION_STATUS, WEBSITE_NOTES_TAG } from "@/lib/types";
 import { sendGuestConfirmationEmail, sendReservationEmail } from "@/lib/email";
 
 /** Upper bound on guests when a room's capacity isn't known from the DB. */
@@ -38,8 +38,9 @@ function str(formData: FormData, key: string): string {
  *
  * Server-authoritative: re-validate every field, re-run the per-room
  * availability check against the live DB, then insert into `reservations`
- * stamped `source = website`. A Postgres `23P01` (exclusion_violation) — if the
- * DB has a double-booking guard — is treated as "just taken".
+ * (tagged as a website booking via `notes` — the live table has no `source`
+ * column). A Postgres `23P01` (exclusion_violation) — if the DB has a
+ * double-booking guard — is treated as "just taken".
  */
 export async function createBooking(
   _prev: BookingState,
@@ -119,9 +120,12 @@ export async function createBooking(
   const nights = nightsBetween(checkIn, checkOut);
   const totalAmount = Number((room.priceUsd * nights).toFixed(2));
 
-  // The shared reservations table has no guests column, so fold the count into
-  // `notes` (kept first so the front desk sees it at a glance).
-  const notes = [`Guests: ${guests}`, message].filter(Boolean).join("\n");
+  // The shared reservations table has no guests or source column, so fold the
+  // count (kept first so the front desk sees it at a glance) and the website
+  // tag into `notes`.
+  const notes = [`Guests: ${guests}`, message, WEBSITE_NOTES_TAG]
+    .filter(Boolean)
+    .join("\n");
 
   const { data, error } = await supabase
     .from("reservations")
@@ -133,7 +137,6 @@ export async function createBooking(
       check_in_date: checkIn,
       check_out_date: checkOut,
       status: NEW_RESERVATION_STATUS,
-      source: NEW_RESERVATION_SOURCE,
       total_amount: totalAmount,
       notes,
     })

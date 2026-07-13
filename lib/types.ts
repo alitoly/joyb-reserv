@@ -2,14 +2,14 @@
 
 /**
  * A room as the website displays and books it (view-model — no PII).
- * Built in `lib/rooms-data.ts` by joining `rooms` → `room_types`, `pax`,
+ * Built in `lib/rooms-data.ts` by joining `rooms` → `room_types`,
  * `room_images`.
  */
 export interface RoomListing {
   id: string; // rooms.id (stringified)
-  name: string; // rooms.room_name
+  name: string; // rooms.name
   typeName: string; // room_types.name
-  capacity: number | null; // pax.value
+  capacity: number | null; // rooms.max_pax
   priceUsd: number; // rooms.day_payment (per night)
   description: string | null; // rooms.description
   imageUrl: string; // first resolved Storage/public URL (or fallback)
@@ -79,11 +79,20 @@ export const NON_BLOCKING_TENANT_STATUSES = new Set([
 /** Whether long-term `tenants` occupancy also makes a room unbookable. */
 export const CONSIDER_TENANT_OCCUPANCY = true;
 
-/** Status + source stamped on a reservation the website creates. Capitalised to
- *  match the live system's convention (existing rows use "Pending" / "System").
- *  If an INSERT is rejected by a CHECK constraint, confirm the allowed values. */
+/** Status stamped on a reservation the website creates. Capitalised to match
+ *  the live system's convention (live rows use "Confirmed" / "Checked In"). */
 export const NEW_RESERVATION_STATUS = "Pending";
-export const NEW_RESERVATION_SOURCE = "Website";
+
+/** The live `reservations` table has no `source` column, so website bookings
+ *  are tagged inside `notes` instead — both for the front desk and for the
+ *  admin pages' "via Website" badge. */
+export const WEBSITE_NOTES_TAG = "Source: Website";
+
+export function isWebsiteReservation(
+  notes: string | null | undefined,
+): boolean {
+  return !!notes?.includes(WEBSITE_NOTES_TAG);
+}
 
 /** Status written when a manager cancels a reservation from the admin area.
  *  Capitalised to match the live system's convention; lowercased it already

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getServerSupabase, isSupabaseConfigured } from "@/lib/supabase-server";
 import { getSessionUser } from "@/lib/supabase-auth-server";
 import { isManagerEmail } from "@/lib/supabase-auth";
-import { reservationBlocks } from "@/lib/types";
+import { isWebsiteReservation, reservationBlocks } from "@/lib/types";
 import { signOut } from "@/app/admin/actions";
 import { AdminNav } from "@/components/admin-nav";
 import {
@@ -27,12 +27,12 @@ interface Row {
   check_in_date: string | null;
   check_out_date: string | null;
   status: string | null;
-  source: string | null;
-  rooms: { room_name: string | null } | null;
+  notes: string | null;
+  rooms: { name: string | null } | null;
 }
 
 const SELECT =
-  "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, source, rooms(room_name)";
+  "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, notes, rooms(name)";
 
 function pad(n: number): string {
   return String(n).padStart(2, "0");
@@ -65,14 +65,14 @@ async function loadMonth(month: string): Promise<CalendarBooking[]> {
     .filter((r) => r.check_in_date && r.check_out_date)
     .map((r) => ({
       id: r.id,
-      roomName: r.rooms?.room_name ?? "Room",
+      roomName: r.rooms?.name ?? "Room",
       guestName: r.tenant_name ?? "Guest",
       guestEmail: r.tenant_email,
       guestPhone: r.tenant_phone,
       checkIn: r.check_in_date as string,
       checkOut: r.check_out_date as string,
       status: r.status,
-      source: r.source,
+      source: isWebsiteReservation(r.notes) ? "Website" : null,
       blocking: reservationBlocks(r.status),
     }));
 }

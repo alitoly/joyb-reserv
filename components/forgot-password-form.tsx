@@ -27,7 +27,7 @@ export function ForgotPasswordForm() {
         <p className="mt-2 text-ink-soft">
           If <span className="font-medium text-charcoal">{state.email}</span> has an
           account, a password reset link is on its way. Check your spam folder if you
-          don't see it within a few minutes.
+          don&apos;t see it within a few minutes.
         </p>
       </div>
     );

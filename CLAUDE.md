@@ -46,9 +46,11 @@ dynamically per-room (not hardcoded, not grouped by type).
    select non-PII columns. When env vars are absent, helpers return `null`/`[]` and the
    app degrades gracefully.
 2. **Room listing** (`lib/rooms-data.ts`): `listRooms()` / `getRoom(id)` join
-   `rooms → room_types(name), pax(value), room_images(image_path)` into the
-   `RoomListing` view-model. `day_payment` is the nightly price; `pax.value` is
-   capacity; the first `room_images` row resolves to a Storage public URL.
+   `rooms → room_types(name), room_images(image_path)` into the `RoomListing`
+   view-model. Live columns: `rooms.name` (NOT `room_name`), `day_payment` is the
+   nightly price, `rooms.max_pax` is capacity (the `pax` table is a guest
+   registry, not capacity). Run `node scripts/check-db-schema.mjs` when queries
+   start failing — the reception developer has renamed columns before.
 3. **Availability** (`lib/bookings.ts`): per-room. A room is unavailable when a
    blocking `reservations` row overlaps `[checkIn, checkOut)` (overlap rule
    `existing.check_in_date < new.check_out AND existing.check_out_date > new.check_in`),
@@ -56,12 +58,13 @@ dynamically per-room (not hardcoded, not grouped by type).
    Reads all reservations regardless of `source`, so front-desk bookings block the site.
 4. **Status rules are centralised in `lib/types.ts`** (`HIDDEN_ROOM_STATUSES`,
    `NON_BLOCKING_RESERVATION_STATUSES`, `NON_BLOCKING_TENANT_STATUSES`,
-   `NEW_RESERVATION_STATUS`/`SOURCE`). They are lenient for display and conservative for
+   `NEW_RESERVATION_STATUS`, `WEBSITE_NOTES_TAG`). They are lenient for display and conservative for
    availability; **confirm the real status strings with the reception-system developer**
    and adjust them in that one place.
 5. `app/book/actions.ts` (`"use server"`) re-validates every field, re-checks
    `isRoomAvailable`, computes `total_amount = day_payment × nights`, and inserts into
-   `reservations` with `source = 'website'`. It treats a Postgres `23P01`
+   `reservations`. The live table has **no `source` column** — website bookings are
+   tagged with `WEBSITE_NOTES_TAG` inside `notes` instead. It treats a Postgres `23P01`
    (exclusion_violation) as "just taken" — relevant only if the DB has a double-booking
    exclusion constraint (confirm; add one if missing).
 
@@ -74,9 +77,9 @@ writes `CANCELLED_RESERVATION_STATUS`, which is non-blocking so the dates free u
 `proxy.ts` matcher guards `/account/**` (any user) and `/admin/**` (managers only).
 
 **Prerequisite:** the `service_role` role needs `GRANT SELECT` on `rooms, room_types,
-pax, room_images, reservations, tenants` and `GRANT INSERT` on `reservations` — until
-then every query returns `permission denied` and the site shows its graceful empty/not-
-connected states. `next.config.ts` allows `*.supabase.co/storage/v1/object/public/**`
+pax, room_images, reservations, tenants` and `GRANT INSERT, UPDATE` on `reservations`
+(UPDATE is what admin cancellation uses) — until then every query returns
+`permission denied` and the site shows its graceful empty/not-connected states. `next.config.ts` allows `*.supabase.co/storage/v1/object/public/**`
 for room images. `lib/rooms.ts` is now **presentation-only** (facilities, bed sizes,
 fallback image) — it no longer defines inventory.
 

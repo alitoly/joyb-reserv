@@ -19,7 +19,7 @@ export default function ForgotPasswordPage() {
             Forgot your password?
           </h1>
           <p className="mt-4 text-ink-soft">
-            Enter your email and we'll send you a link to set a new one.
+            Enter your email and we&apos;ll send you a link to set a new one.
           </p>
         </Reveal>
         <Reveal delay={100} className="mt-8">
