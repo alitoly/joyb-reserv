@@ -28,11 +28,12 @@ interface ReservationRow {
   total_amount: number | null;
   notes: string | null;
   created_at: string | null;
-  rooms: { name: string | null } | null;
+  room_types: { name: string | null } | null;
 }
 
+// Room TYPE, not physical room — reception assigns the room at check-in.
 const SELECT =
-  "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, total_amount, notes, created_at, rooms(name)";
+  "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, total_amount, notes, created_at, room_types(name)";
 
 async function loadReservations(): Promise<ReservationRow[]> {
   const supabase = getServerSupabase();
@@ -117,7 +118,7 @@ export default async function ReservationsPage() {
                     JB{String(r.id).padStart(5, "0")}
                   </td>
                   <td className="px-5 py-4 text-charcoal">
-                    {r.rooms?.name ?? "—"}
+                    {r.room_types?.name ?? "—"}
                     {isWebsiteReservation(r.notes) && (
                       <span className="mt-1 block text-xs text-ink-soft">
                         via Website

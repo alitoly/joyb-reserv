@@ -1,50 +1,67 @@
 import { getServerSupabase, isSupabaseConfigured } from "./supabase-server";
-import {
-  CONSIDER_TENANT_OCCUPANCY,
-  isRoomLive,
-  reservationBlocks,
-  tenantBlocks,
-  type AvailabilityResult,
-} from "./types";
+import { reservationBlocks, type AvailabilityResult } from "./types";
 
 /**
  * Type-level availability against the live reservation database. Server-only
- * — imported by `/api/availability` and the `/book` Server Action. The site
- * books by room TYPE, not by physical room: a type with N physical rooms
- * only shows "sold out" once all N are booked for the requested dates.
+ * — imported by `/api/availability` and the `/book` Server Action.
+ *
+ * The site sells room TYPES. Inventory is `room_types.number_of_rooms`; a type is
+ * sold out once that many reservations overlap the requested dates. Bookings are
+ * counted by `reservations.room_type_id` — the `rooms` table is not consulted,
+ * its rows being mock data from the reception system's testing.
  *
  * Overlap rule (inclusive check-in, exclusive check-out):
  *   existing.check_in_date < new.check_out  AND  existing.check_out_date > new.check_in
  *
- * A physical room is unavailable for a range if a blocking `reservations` row
- * overlaps it, or (when enabled) a long-term `tenants` occupancy overlaps it.
- * Reads all reservations regardless of `notes` tag, so front-desk bookings
- * block the website too.
+ * ⚠️ Reservations with a NULL `room_type_id` are invisible to this count. Any
+ * front-desk booking that doesn't set the column cannot block the website, so the
+ * reception app must always populate it (and old rows want backfilling).
  */
 
-/** Result of a type-level availability check. `roomId`/`roomName` identify
- *  one specific free physical room to assign — server-side use only, not for
- *  the client response. */
-export interface TypeAvailability extends AvailabilityResult {
-  roomId: number | null;
-  roomName: string | null;
-}
+/** Result of a type-level availability check. */
+export type TypeAvailability = AvailabilityResult;
 
-async function liveRoomsForType(
-  typeId: number,
-): Promise<{ id: number; name: string | null }[]> {
+/** Declared inventory for a type — `room_types.number_of_rooms`. */
+async function declaredRoomCount(typeId: number): Promise<number> {
   const supabase = getServerSupabase();
-  if (!supabase) return [];
+  if (!supabase) return 0;
   const { data, error } = await supabase
-    .from("rooms")
-    .select("id, name, status")
-    .eq("room_type_id", typeId);
-  if (error || !data) return [];
-  return data.filter((r) => isRoomLive(r.status)).map((r) => ({ id: r.id, name: r.name }));
+    .from("room_types")
+    .select("number_of_rooms")
+    .eq("id", typeId)
+    .maybeSingle();
+  if (error || !data) {
+    if (error) console.error("inventory read failed:", error.message);
+    return 0;
+  }
+  return Number(data.number_of_rooms ?? 0);
 }
 
-/** Check availability for a room type across a date range. Picks one free
- *  physical room to assign if available. */
+/** How many rooms of this type are already taken across the date range. */
+async function occupiedCount(
+  typeId: number,
+  checkIn: string,
+  checkOut: string,
+): Promise<number | null> {
+  const supabase = getServerSupabase();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("reservations")
+    .select("status")
+    .eq("room_type_id", typeId)
+    .lt("check_in_date", checkOut)
+    .gt("check_out_date", checkIn);
+
+  if (error) {
+    console.error("type availability read failed:", error.message);
+    return null;
+  }
+
+  return (data ?? []).filter((r) => reservationBlocks(r.status)).length;
+}
+
+/** Check availability for a room type across a date range. */
 export async function isTypeAvailable(
   typeId: string,
   checkIn: string,
@@ -55,74 +72,35 @@ export async function isTypeAvailable(
       configured: false,
       available: false,
       message: "Live availability is not connected yet.",
-      roomId: null,
-      roomName: null,
     };
   }
 
-  const supabase = getServerSupabase();
   const numTypeId = Number(typeId);
-  const rooms = await liveRoomsForType(numTypeId);
+  const [totalCount, occupied] = await Promise.all([
+    declaredRoomCount(numTypeId),
+    occupiedCount(numTypeId, checkIn, checkOut),
+  ]);
 
-  if (!supabase || rooms.length === 0) {
+  if (occupied === null) {
+    return {
+      configured: true,
+      available: false,
+      message: "We couldn't check availability just now. You can still send a request.",
+      totalCount,
+    };
+  }
+
+  if (totalCount === 0) {
     return {
       configured: true,
       available: false,
       message: "No rooms of this type are available right now.",
       freeCount: 0,
-      totalCount: rooms.length,
-      roomId: null,
-      roomName: null,
+      totalCount,
     };
   }
 
-  const roomIds = rooms.map((r) => r.id);
-
-  const { data: reservations, error } = await supabase
-    .from("reservations")
-    .select("room_id, status, check_in_date, check_out_date")
-    .in("room_id", roomIds)
-    .lt("check_in_date", checkOut)
-    .gt("check_out_date", checkIn);
-
-  if (error) {
-    console.error("type availability read failed:", error.message);
-    return {
-      configured: true,
-      available: false,
-      message: "We couldn't check availability just now. You can still send a request.",
-      totalCount: rooms.length,
-      roomId: null,
-      roomName: null,
-    };
-  }
-
-  const blockedIds = new Set(
-    (reservations ?? [])
-      .filter((r) => reservationBlocks(r.status))
-      .map((r) => r.room_id),
-  );
-
-  if (CONSIDER_TENANT_OCCUPANCY) {
-    const { data: tenants, error: tenantError } = await supabase
-      .from("tenants")
-      .select("room_id, status, check_in, check_out")
-      .in("room_id", roomIds)
-      .lt("check_in", checkOut);
-
-    if (tenantError) {
-      console.error("tenant occupancy read failed:", tenantError.message);
-    }
-    for (const t of tenants ?? []) {
-      if (tenantBlocks(t.status) && (!t.check_out || t.check_out > checkIn)) {
-        blockedIds.add(t.room_id);
-      }
-    }
-  }
-
-  const free = rooms.filter((r) => !blockedIds.has(r.id));
-  const totalCount = rooms.length;
-  const freeCount = free.length;
+  const freeCount = Math.max(0, totalCount - occupied);
 
   if (freeCount === 0) {
     return {
@@ -131,8 +109,6 @@ export async function isTypeAvailable(
       message: "This room type is fully booked for these dates. Try different dates.",
       freeCount,
       totalCount,
-      roomId: null,
-      roomName: null,
     };
   }
 
@@ -145,7 +121,36 @@ export async function isTypeAvailable(
         : "Available for your dates.",
     freeCount,
     totalCount,
-    roomId: free[0].id,
-    roomName: free[0].name,
   };
+}
+
+/**
+ * TEMPORARY SHIM — delete once `reservations.room_id` is nullable.
+ *
+ * `reservations.room_id` is still NOT NULL and an FK to `rooms.id`, so a booking
+ * cannot be saved without naming a physical room, even though the guest only
+ * chose a TYPE and reception assigns the real room at check-in. Until the
+ * reception developer drops that NOT NULL, we attach any room belonging to the
+ * type just to satisfy the constraint. The value is meaningless — reception
+ * should read `room_type_id`, not `room_id`, on website bookings.
+ *
+ * Returns null when the type has no `rooms` row at all, in which case the booking
+ * genuinely cannot be written.
+ */
+export async function placeholderRoomId(typeId: string): Promise<number | null> {
+  const supabase = getServerSupabase();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("rooms")
+    .select("id")
+    .eq("room_type_id", Number(typeId))
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) {
+    if (error) console.error("placeholder room lookup failed:", error.message);
+    return null;
+  }
+  return data.id;
 }
