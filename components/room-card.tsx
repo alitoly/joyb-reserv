@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { RoomListing } from "@/lib/types";
-import { FACILITY_LABELS, roomSizeForType } from "@/lib/rooms";
+import { FACILITY_LABELS } from "@/lib/rooms";
 import { buttonClass } from "./ui";
 
 /** Card for a room TYPE loaded from the database. The whole card links to the
@@ -18,7 +18,7 @@ export function RoomCard({
     <Link
       href={`/rooms/${room.id}`}
       className="group flex h-full flex-col overflow-hidden rounded-3xl bg-surface shadow-[0_1px_3px_rgba(29,32,32,0.06)] ring-1 ring-charcoal/5 transition-shadow duration-300 hover:shadow-[0_18px_40px_-18px_rgba(29,32,32,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
-      aria-label={`View ${room.name} Room — $${room.priceUsd} per night`}
+      aria-label={`View ${room.name} — $${room.priceUsd} per night`}
     >
       <div className="relative aspect-[4/3] overflow-hidden">
         <Image
@@ -35,11 +35,9 @@ export function RoomCard({
       </div>
 
       <div className="flex flex-1 flex-col p-6">
-        <h3 className="font-display text-2xl text-charcoal">{room.name} Room</h3>
+        <h3 className="font-display text-2xl text-charcoal">{room.name}</h3>
         <p className="mt-1 text-sm text-ink-soft">
           {room.capacity ? `Sleeps ${room.capacity}` : room.typeName}
-          {" · "}
-          {roomSizeForType(room.typeName)}
         </p>
 
         <ul className="mt-4 flex flex-wrap gap-2">
