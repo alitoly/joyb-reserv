@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getRoomType } from "@/lib/rooms-data";
-import { facilitiesForType, roomSizeForType } from "@/lib/rooms";
+import { facilitiesForType } from "@/lib/rooms";
 import { getServerSupabase } from "@/lib/supabase-server";
 import { getSessionUser } from "@/lib/supabase-auth-server";
 import {
@@ -27,10 +27,10 @@ export async function generateMetadata({
   const room = await getRoomType(id);
   if (!room) return { title: "Room not found" };
   return {
-    title: `${room.name} Room`,
+    title: room.name,
     description:
       room.description ??
-      `Book a ${room.name.toLowerCase()} room at JoyB Resort Zanzibar from $${room.priceUsd} per night.`,
+      `Book the ${room.name} at JoyB Resort Zanzibar from $${room.priceUsd} per night.`,
   };
 }
 
@@ -69,7 +69,6 @@ export default async function RoomDetailsPage({
 
   const defaultGuest = await guestDefaults();
   const facilities = facilitiesForType(room.typeName);
-  const size = roomSizeForType(room.typeName);
   const [hero, ...thumbs] = room.images;
 
   return (
@@ -89,13 +88,11 @@ export default async function RoomDetailsPage({
           <Reveal>
             <Kicker>Room type</Kicker>
             <h1 className="mt-3 text-[clamp(2rem,4vw,3.25rem)] leading-[1.05] text-charcoal">
-              {room.name} Room
+              {room.name}
             </h1>
             <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-ink-soft">
               {room.capacity && <span>Sleeps {room.capacity}</span>}
               {room.capacity && <span aria-hidden="true">·</span>}
-              <span>{size}</span>
-              <span aria-hidden="true">·</span>
               <span>
                 {room.totalRooms} {room.totalRooms === 1 ? "room" : "rooms"} of this type
               </span>
