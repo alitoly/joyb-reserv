@@ -4,6 +4,7 @@ import { useActionState, useEffect, useMemo, useState } from "react";
 import { createBooking, type BookingState } from "@/app/book/actions";
 import type { RoomListing } from "@/lib/types";
 import { addDays, formatLong, nightsBetween, todayISO } from "@/lib/dates";
+import { calculatePrice } from "@/lib/pricing";
 import { Button } from "./ui";
 import { AvailabilityBanner, type AvailState } from "./availability-banner";
 import { AlertIcon, CheckIcon, SpinnerIcon } from "./icons";
@@ -66,6 +67,7 @@ export function RoomBookingForm({
   const datesValid =
     checkIn >= today && checkOut > checkIn && Boolean(checkIn && checkOut);
   const nights = datesValid ? nightsBetween(checkIn, checkOut) : 0;
+  const price = datesValid ? calculatePrice(room.priceUsd, nights) : null;
 
   // Keep check-out ahead of check-in (handled on change, not in an effect).
   function handleCheckIn(value: string) {
@@ -155,7 +157,19 @@ export function RoomBookingForm({
               {formatLong(state.checkOut)}
             </dd>
           </div>
+          <div>
+            <dt className="text-sm text-ink-soft">
+              Subtotal + VAT (18%)
+            </dt>
+            <dd className="font-medium text-charcoal">
+              ${state.subtotalUsd} + ${state.vatUsd}
+            </dd>
+          </div>
         </dl>
+
+        <p className="mt-4 text-charcoal">
+          Total due <span className="font-display text-2xl">${state.totalUsd}</span>
+        </p>
 
         <Button
           variant="outline"
@@ -374,18 +388,23 @@ export function RoomBookingForm({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div aria-live="polite" className="text-ink-soft">
             <p className="font-medium text-charcoal">{room.name}</p>
-            {datesValid ? (
-              <p className="mt-0.5 text-sm">
-                {nights} {nights === 1 ? "night" : "nights"} ·{" "}
-                <span className="text-ink-soft">
-                  ${room.priceUsd} × {nights}
-                </span>{" "}
-                ={" "}
-                <span className="font-display text-xl text-charcoal">
-                  ${room.priceUsd * nights}
-                </span>{" "}
-                <span className="text-xs">est.</span>
-              </p>
+            {datesValid && price ? (
+              <>
+                <p className="mt-0.5 text-sm">
+                  {nights} {nights === 1 ? "night" : "nights"} ·{" "}
+                  <span className="text-ink-soft">
+                    ${room.priceUsd} × {nights}
+                  </span>{" "}
+                  = ${price.subtotal}
+                </p>
+                <p className="mt-0.5 text-sm">
+                  + VAT (18%) ${price.vat} ={" "}
+                  <span className="font-display text-xl text-charcoal">
+                    ${price.grandTotal}
+                  </span>{" "}
+                  <span className="text-xs">est.</span>
+                </p>
+              </>
             ) : (
               <p className="mt-0.5 text-sm">
                 Pick your dates to see availability and the total.

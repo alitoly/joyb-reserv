@@ -4,6 +4,7 @@ import { getServerSupabase, isSupabaseConfigured } from "@/lib/supabase-server";
 import { isTypeAvailable, placeholderRoomId } from "@/lib/bookings";
 import { getRoomType } from "@/lib/rooms-data";
 import { isValidISODate, nightsBetween, todayISO } from "@/lib/dates";
+import { calculatePrice } from "@/lib/pricing";
 import { NEW_RESERVATION_STATUS, WEBSITE_NOTES_TAG } from "@/lib/types";
 import { sendGuestConfirmationEmail, sendReservationEmail } from "@/lib/email";
 
@@ -17,6 +18,9 @@ export interface BookingSuccess {
   checkIn: string;
   checkOut: string;
   nights: number;
+  subtotalUsd: number;
+  vatUsd: number;
+  totalUsd: number;
 }
 
 export interface BookingError {
@@ -152,7 +156,7 @@ export async function createBooking(
   }
 
   const nights = nightsBetween(checkIn, checkOut);
-  const totalAmount = Number((roomType.priceUsd * nights).toFixed(2));
+  const { subtotal, vat, grandTotal } = calculatePrice(roomType.priceUsd, nights);
 
   // The shared reservations table has no guests or source column, so fold the
   // count (kept first so the front desk sees it at a glance) and the website
@@ -172,7 +176,9 @@ export async function createBooking(
       check_in_date: checkIn,
       check_out_date: checkOut,
       status: NEW_RESERVATION_STATUS,
-      total_amount: totalAmount,
+      total_amount: subtotal,
+      vat_amount: vat,
+      grand_total: grandTotal,
       reference_number: generateReferenceNumber(),
       notes,
     })
@@ -211,7 +217,9 @@ export async function createBooking(
     guestName,
     guestEmail,
     guestPhone,
-    totalUsd: totalAmount,
+    subtotalUsd: subtotal,
+    vatUsd: vat,
+    totalUsd: grandTotal,
     notes: message || null,
   };
   const mailResults = await Promise.allSettled([
@@ -231,5 +239,8 @@ export async function createBooking(
     checkIn,
     checkOut,
     nights,
+    subtotalUsd: subtotal,
+    vatUsd: vat,
+    totalUsd: grandTotal,
   };
 }

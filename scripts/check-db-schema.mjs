@@ -49,8 +49,8 @@ const READS = [
 const WRITE_COLUMNS = {
   reservations: [
     "room_type_id", "room_id", "tenant_name", "tenant_email", "tenant_phone",
-    "check_in_date", "check_out_date", "status", "total_amount",
-    "reference_number", "notes",
+    "check_in_date", "check_out_date", "status", "total_amount", "vat_amount",
+    "grand_total", "reference_number", "notes",
   ],
 };
 

@@ -29,6 +29,11 @@ export interface ReservationEmailPayload {
   guestName: string;
   guestEmail: string;
   guestPhone: string;
+  /** Pre-VAT nightly rate × nights. */
+  subtotalUsd: number;
+  /** 18% of subtotalUsd. */
+  vatUsd: number;
+  /** subtotalUsd + vatUsd — what the guest actually pays. */
   totalUsd: number;
   notes: string | null;
 }
@@ -76,6 +81,8 @@ export async function sendReservationEmail(
     row("Check-in:", formatLong(p.checkIn)),
     row("Check-out:", `${formatLong(p.checkOut)} (${nightsLabel})`),
     row("Guests:", String(p.guests)),
+    row("Subtotal:", `$${p.subtotalUsd}`),
+    row("VAT (18%):", `$${p.vatUsd}`),
     row("Total:", `$${p.totalUsd}`),
     "",
     row("Name:", p.guestName),
@@ -95,6 +102,8 @@ export async function sendReservationEmail(
         ${htmlRow("Check-in", formatLong(p.checkIn))}
         ${htmlRow("Check-out", `${formatLong(p.checkOut)} (${nightsLabel})`)}
         ${htmlRow("Guests", String(p.guests))}
+        ${htmlRow("Subtotal", `$${p.subtotalUsd}`)}
+        ${htmlRow("VAT (18%)", `$${p.vatUsd}`)}
         ${htmlRow("Total", `$${p.totalUsd}`)}
         ${htmlRow("Name", p.guestName)}
         ${htmlRow("Email", p.guestEmail)}
@@ -147,6 +156,8 @@ export async function sendGuestConfirmationEmail(
     row("Check-in:", formatLong(p.checkIn)),
     row("Check-out:", `${formatLong(p.checkOut)} (${nightsLabel})`),
     row("Guests:", String(p.guests)),
+    row("Subtotal:", `$${p.subtotalUsd}`),
+    row("VAT (18%):", `$${p.vatUsd}`),
     row("Total:", `$${p.totalUsd}`),
     "",
     "Our team will contact you shortly to confirm your booking.",
@@ -165,6 +176,8 @@ export async function sendGuestConfirmationEmail(
         ${htmlRow("Check-in", formatLong(p.checkIn))}
         ${htmlRow("Check-out", `${formatLong(p.checkOut)} (${nightsLabel})`)}
         ${htmlRow("Guests", String(p.guests))}
+        ${htmlRow("Subtotal", `$${p.subtotalUsd}`)}
+        ${htmlRow("VAT (18%)", `$${p.vatUsd}`)}
         ${htmlRow("Total", `$${p.totalUsd}`)}
       </table>
       <p style="margin:16px 0 0;color:#4a4f48">Our team will contact you shortly to confirm your booking.</p>
