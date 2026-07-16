@@ -59,10 +59,25 @@ export function RoomBookingForm({
   const maxGuests = room.capacity && room.capacity > 0
     ? room.capacity
     : MAX_GUESTS_FALLBACK;
-  const guestOptions = useMemo(
+
+  const [adults, setAdults] = useState(1);
+  const [children, setChildren] = useState(0);
+
+  const adultOptions = useMemo(
     () => Array.from({ length: maxGuests }, (_, i) => i + 1),
     [maxGuests],
   );
+  const maxChildren = Math.max(0, maxGuests - adults);
+  const childOptions = useMemo(
+    () => Array.from({ length: maxChildren + 1 }, (_, i) => i),
+    [maxChildren],
+  );
+
+  // Keep children within capacity when adults changes.
+  function handleAdults(value: number) {
+    setAdults(value);
+    if (children > maxGuests - value) setChildren(Math.max(0, maxGuests - value));
+  }
 
   const datesValid =
     checkIn >= today && checkOut > checkIn && Boolean(checkIn && checkOut);
@@ -155,14 +170,6 @@ export function RoomBookingForm({
             </dt>
             <dd className="font-medium text-charcoal">
               {formatLong(state.checkOut)}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm text-ink-soft">
-              Subtotal + VAT (18%)
-            </dt>
-            <dd className="font-medium text-charcoal">
-              ${state.subtotalUsd} + ${state.vatUsd}
             </dd>
           </div>
         </dl>
@@ -261,29 +268,57 @@ export function RoomBookingForm({
         <AvailabilityBanner avail={avail} />
 
         {/* Guests */}
-        <div className="sm:max-w-[12rem]">
-          <label htmlFor="guests" className="text-sm font-medium text-charcoal">
-            Guests
-          </label>
-          <select
-            id="guests"
-            name="guests"
-            defaultValue="1"
-            className={fieldClass(Boolean(fe.guests))}
-            aria-invalid={Boolean(fe.guests)}
-            aria-describedby={fe.guests ? "guests-err" : undefined}
-          >
-            {guestOptions.map((n) => (
-              <option key={n} value={n}>
-                {n} {n === 1 ? "guest" : "guests"}
-              </option>
-            ))}
-          </select>
-          {fe.guests && (
-            <p id="guests-err" className="mt-1 text-sm text-rust-strong">
-              {fe.guests}
-            </p>
-          )}
+        <div className="grid gap-5 sm:grid-cols-2 sm:max-w-[24rem]">
+          <div>
+            <label htmlFor="adults" className="text-sm font-medium text-charcoal">
+              Adults
+            </label>
+            <select
+              id="adults"
+              name="adults"
+              value={adults}
+              onChange={(e) => handleAdults(Number(e.target.value))}
+              className={fieldClass(Boolean(fe.adults))}
+              aria-invalid={Boolean(fe.adults)}
+              aria-describedby={fe.adults ? "adults-err" : undefined}
+            >
+              {adultOptions.map((n) => (
+                <option key={n} value={n}>
+                  {n} {n === 1 ? "adult" : "adults"}
+                </option>
+              ))}
+            </select>
+            {fe.adults && (
+              <p id="adults-err" className="mt-1 text-sm text-rust-strong">
+                {fe.adults}
+              </p>
+            )}
+          </div>
+          <div>
+            <label htmlFor="children" className="text-sm font-medium text-charcoal">
+              Children
+            </label>
+            <select
+              id="children"
+              name="children"
+              value={children}
+              onChange={(e) => setChildren(Number(e.target.value))}
+              className={fieldClass(Boolean(fe.children))}
+              aria-invalid={Boolean(fe.children)}
+              aria-describedby={fe.children ? "children-err" : undefined}
+            >
+              {childOptions.map((n) => (
+                <option key={n} value={n}>
+                  {n} {n === 1 ? "child" : "children"}
+                </option>
+              ))}
+            </select>
+            {fe.children && (
+              <p id="children-err" className="mt-1 text-sm text-rust-strong">
+                {fe.children}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Guest details */}
@@ -389,22 +424,17 @@ export function RoomBookingForm({
           <div aria-live="polite" className="text-ink-soft">
             <p className="font-medium text-charcoal">{room.name}</p>
             {datesValid && price ? (
-              <>
-                <p className="mt-0.5 text-sm">
-                  {nights} {nights === 1 ? "night" : "nights"} ·{" "}
-                  <span className="text-ink-soft">
-                    ${room.priceUsd} × {nights}
-                  </span>{" "}
-                  = ${price.subtotal}
-                </p>
-                <p className="mt-0.5 text-sm">
-                  + VAT (18%) ${price.vat} ={" "}
-                  <span className="font-display text-xl text-charcoal">
-                    ${price.grandTotal}
-                  </span>{" "}
-                  <span className="text-xs">est.</span>
-                </p>
-              </>
+              <p className="mt-0.5 text-sm">
+                {nights} {nights === 1 ? "night" : "nights"} ·{" "}
+                <span className="text-ink-soft">
+                  ${room.priceUsd} × {nights}
+                </span>{" "}
+                ={" "}
+                <span className="font-display text-xl text-charcoal">
+                  ${price.total}
+                </span>{" "}
+                <span className="text-xs">est.</span>
+              </p>
             ) : (
               <p className="mt-0.5 text-sm">
                 Pick your dates to see availability and the total.

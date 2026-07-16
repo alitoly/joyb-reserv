@@ -37,7 +37,7 @@ const READS = [
   ["app/account bookings list", "reservations",
     "id, check_in_date, check_out_date, status, total_amount, created_at, room_types(name)"],
   ["app/admin/reservations list", "reservations",
-    "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, total_amount, notes, created_at, room_types(name)"],
+    "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, total_amount, adults, children, notes, created_at, room_types(name)"],
   ["app/admin/manage calendar", "reservations",
     "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, notes, room_types(name)"],
 ];
@@ -49,8 +49,8 @@ const READS = [
 const WRITE_COLUMNS = {
   reservations: [
     "room_type_id", "room_id", "tenant_name", "tenant_email", "tenant_phone",
-    "check_in_date", "check_out_date", "status", "total_amount", "vat_amount",
-    "grand_total", "reference_number", "notes",
+    "check_in_date", "check_out_date", "status", "total_amount", "adults",
+    "children", "reference_number", "notes",
   ],
 };
 
