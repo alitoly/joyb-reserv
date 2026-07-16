@@ -25,10 +25,12 @@ export interface ReservationEmailPayload {
   checkIn: string;
   checkOut: string;
   nights: number;
-  guests: number;
+  adults: number;
+  children: number;
   guestName: string;
   guestEmail: string;
   guestPhone: string;
+  /** Nightly rate × nights — what the guest actually pays. */
   totalUsd: number;
   notes: string | null;
 }
@@ -75,7 +77,8 @@ export async function sendReservationEmail(
     row("Room:", p.roomName),
     row("Check-in:", formatLong(p.checkIn)),
     row("Check-out:", `${formatLong(p.checkOut)} (${nightsLabel})`),
-    row("Guests:", String(p.guests)),
+    row("Adults:", String(p.adults)),
+    row("Children:", String(p.children)),
     row("Total:", `$${p.totalUsd}`),
     "",
     row("Name:", p.guestName),
@@ -94,7 +97,8 @@ export async function sendReservationEmail(
         ${htmlRow("Room", p.roomName)}
         ${htmlRow("Check-in", formatLong(p.checkIn))}
         ${htmlRow("Check-out", `${formatLong(p.checkOut)} (${nightsLabel})`)}
-        ${htmlRow("Guests", String(p.guests))}
+        ${htmlRow("Adults", String(p.adults))}
+        ${htmlRow("Children", String(p.children))}
         ${htmlRow("Total", `$${p.totalUsd}`)}
         ${htmlRow("Name", p.guestName)}
         ${htmlRow("Email", p.guestEmail)}
@@ -146,7 +150,8 @@ export async function sendGuestConfirmationEmail(
     row("Room:", p.roomName),
     row("Check-in:", formatLong(p.checkIn)),
     row("Check-out:", `${formatLong(p.checkOut)} (${nightsLabel})`),
-    row("Guests:", String(p.guests)),
+    row("Adults:", String(p.adults)),
+    row("Children:", String(p.children)),
     row("Total:", `$${p.totalUsd}`),
     "",
     "Our team will contact you shortly to confirm your booking.",
@@ -164,7 +169,8 @@ export async function sendGuestConfirmationEmail(
         ${htmlRow("Room", p.roomName)}
         ${htmlRow("Check-in", formatLong(p.checkIn))}
         ${htmlRow("Check-out", `${formatLong(p.checkOut)} (${nightsLabel})`)}
-        ${htmlRow("Guests", String(p.guests))}
+        ${htmlRow("Adults", String(p.adults))}
+        ${htmlRow("Children", String(p.children))}
         ${htmlRow("Total", `$${p.totalUsd}`)}
       </table>
       <p style="margin:16px 0 0;color:#4a4f48">Our team will contact you shortly to confirm your booking.</p>

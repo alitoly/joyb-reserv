@@ -4,6 +4,7 @@ import { getServerSupabase, isSupabaseConfigured } from "@/lib/supabase-server";
 import { isTypeAvailable, placeholderRoomId } from "@/lib/bookings";
 import { getRoomType } from "@/lib/rooms-data";
 import { isValidISODate, nightsBetween, todayISO } from "@/lib/dates";
+import { calculatePrice } from "@/lib/pricing";
 import { NEW_RESERVATION_STATUS, WEBSITE_NOTES_TAG } from "@/lib/types";
 import { sendGuestConfirmationEmail, sendReservationEmail } from "@/lib/email";
 
@@ -17,6 +18,7 @@ export interface BookingSuccess {
   checkIn: string;
   checkOut: string;
   nights: number;
+  totalUsd: number;
 }
 
 export interface BookingError {
@@ -81,21 +83,24 @@ export async function createBooking(
   const guestEmail = str(formData, "guestEmail");
   const guestPhone = str(formData, "guestPhone");
   const message = str(formData, "message");
-  const guests = Number.parseInt(str(formData, "guests") || "1", 10);
+  const adults = Number.parseInt(str(formData, "adults") || "1", 10);
+  const children = Number.parseInt(str(formData, "children") || "0", 10);
 
   const fieldErrors: Record<string, string> = {};
   const roomType = await getRoomType(roomTypeId);
 
-  // Validate guest count against the type's capacity (`room_types.max_pax`).
+  // Validate total guest count against the type's capacity (`room_types.max_pax`).
   // Falls back to a sane bound when the column is unset (0).
   const maxGuests =
     roomType?.capacity && roomType.capacity > 0
       ? roomType.capacity
       : MAX_GUESTS_FALLBACK;
-  if (!Number.isInteger(guests) || guests < 1) {
-    fieldErrors.guests = "Choose how many guests are staying.";
-  } else if (guests > maxGuests) {
-    fieldErrors.guests = `This room type sleeps up to ${maxGuests}.`;
+  if (!Number.isInteger(adults) || adults < 1) {
+    fieldErrors.adults = "Choose how many adults are staying.";
+  } else if (!Number.isInteger(children) || children < 0) {
+    fieldErrors.children = "Choose how many children are staying.";
+  } else if (adults + children > maxGuests) {
+    fieldErrors.adults = `This room type sleeps up to ${maxGuests}.`;
   }
 
   if (!roomType) fieldErrors.room = "Please choose a room.";
@@ -152,14 +157,12 @@ export async function createBooking(
   }
 
   const nights = nightsBetween(checkIn, checkOut);
-  const totalAmount = Number((roomType.priceUsd * nights).toFixed(2));
+  const { total } = calculatePrice(roomType.priceUsd, nights);
 
-  // The shared reservations table has no guests or source column, so fold the
-  // count (kept first so the front desk sees it at a glance) and the website
-  // tag into `notes`.
-  const notes = [`Guests: ${guests}`, message, WEBSITE_NOTES_TAG]
-    .filter(Boolean)
-    .join("\n");
+  // The shared reservations table has no source column, so the website tag
+  // rides in `notes`. Guest counts now have their own `adults`/`children`
+  // columns.
+  const notes = [message, WEBSITE_NOTES_TAG].filter(Boolean).join("\n");
 
   const { data: inserted, error } = await supabase
     .from("reservations")
@@ -172,7 +175,9 @@ export async function createBooking(
       check_in_date: checkIn,
       check_out_date: checkOut,
       status: NEW_RESERVATION_STATUS,
-      total_amount: totalAmount,
+      total_amount: total,
+      adults,
+      children,
       reference_number: generateReferenceNumber(),
       notes,
     })
@@ -207,11 +212,12 @@ export async function createBooking(
     checkIn,
     checkOut,
     nights,
-    guests,
+    adults,
+    children,
     guestName,
     guestEmail,
     guestPhone,
-    totalUsd: totalAmount,
+    totalUsd: total,
     notes: message || null,
   };
   const mailResults = await Promise.allSettled([
@@ -231,5 +237,6 @@ export async function createBooking(
     checkIn,
     checkOut,
     nights,
+    totalUsd: total,
   };
 }

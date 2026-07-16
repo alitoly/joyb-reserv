@@ -26,6 +26,8 @@ interface ReservationRow {
   check_out_date: string | null;
   status: string | null;
   total_amount: number | null;
+  adults: number | null;
+  children: number | null;
   notes: string | null;
   created_at: string | null;
   room_types: { name: string | null } | null;
@@ -33,7 +35,7 @@ interface ReservationRow {
 
 // Room TYPE, not physical room — reception assigns the room at check-in.
 const SELECT =
-  "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, total_amount, notes, created_at, room_types(name)";
+  "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, total_amount, adults, children, notes, created_at, room_types(name)";
 
 async function loadReservations(): Promise<ReservationRow[]> {
   const supabase = getServerSupabase();
@@ -103,6 +105,7 @@ export default async function ReservationsPage() {
                 <th className="px-5 py-4 font-medium">Room</th>
                 <th className="px-5 py-4 font-medium">Guest</th>
                 <th className="px-5 py-4 font-medium">Stay</th>
+                <th className="px-5 py-4 font-medium">Guests</th>
                 <th className="px-5 py-4 font-medium">Status</th>
                 <th className="px-5 py-4 text-right font-medium">Total</th>
                 <th className="px-5 py-4 text-right font-medium">Action</th>
@@ -156,6 +159,10 @@ export default async function ReservationsPage() {
                     <span className="block text-xs text-ink-soft">
                       to {fmt(r.check_out_date)}
                     </span>
+                  </td>
+                  <td className="px-5 py-4 text-charcoal">
+                    {r.adults ?? 1} adult{(r.adults ?? 1) === 1 ? "" : "s"}
+                    {r.children ? `, ${r.children} child${r.children === 1 ? "" : "ren"}` : ""}
                   </td>
                   <td className="px-5 py-4">
                     <span className="inline-flex rounded-full bg-sand-deep px-3 py-1 text-xs font-medium text-charcoal">

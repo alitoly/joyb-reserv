@@ -88,7 +88,9 @@ below).
    into `reservations` with **`room_type_id`** — the guest's real choice — plus the
    `room_id` placeholder described above. The guest is never shown a physical room name.
    The live table has **no `source` column**, so website bookings are tagged with
-   `WEBSITE_NOTES_TAG` inside `notes`. Guest count also rides in `notes` (no column).
+   `WEBSITE_NOTES_TAG` inside `notes`. Guest counts are written to the `adults` /
+   `children` columns. `total_amount` is what the guest pays — the live schema has
+   no `vat_amount` / `grand_total` columns.
    **`nationality` / `national_id` are never collected or written** — the site does not
    handle national ID credentials. `/account` and `/admin/**` display `room_types(name)`,
    never `rooms(name)`.
