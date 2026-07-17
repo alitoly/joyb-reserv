@@ -41,7 +41,7 @@ export function SiteFooter() {
           <address className="mt-4 space-y-2 text-sm not-italic text-sand/70">
             <p>
               <a
-                href="https://maps.app.goo.gl/aag3trMGFzyjQMga9"
+                href="https://www.google.com/maps/place/6%C2%B012'28.1%22S+39%C2%B012'55.2%22E/@-6.2073833,39.2152714,17z/data=!4m4!3m3!8m2!3d-6.2078099!4d39.2153358?hl=en&entry=ttu&g_ep=EgoyMDI2MDcxMy4wIKXMDSoASAFQAw%3D%3D"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-gold"
@@ -51,8 +51,8 @@ export function SiteFooter() {
             </p>
             <p>Zanzibar, Tanzania</p>
             <p>
-              <a className="hover:text-gold" href="tel:+255000000000">
-                +255 000 000 000
+              <a className="hover:text-gold" href="tel:+255670117777">
+                +255 670 117 777
               </a>
             </p>
             <p>

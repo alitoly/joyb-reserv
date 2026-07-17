@@ -28,11 +28,12 @@ interface Row {
   check_out_date: string | null;
   status: string | null;
   notes: string | null;
-  rooms: { name: string | null } | null;
+  room_types: { name: string | null } | null;
 }
 
+// Room TYPE, not physical room — reception assigns the room at check-in.
 const SELECT =
-  "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, notes, rooms(name)";
+  "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, notes, room_types(name)";
 
 function pad(n: number): string {
   return String(n).padStart(2, "0");
@@ -65,7 +66,7 @@ async function loadMonth(month: string): Promise<CalendarBooking[]> {
     .filter((r) => r.check_in_date && r.check_out_date)
     .map((r) => ({
       id: r.id,
-      roomName: r.rooms?.name ?? "Room",
+      roomName: r.room_types?.name ?? "Room",
       guestName: r.tenant_name ?? "Guest",
       guestEmail: r.tenant_email,
       guestPhone: r.tenant_phone,

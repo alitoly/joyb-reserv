@@ -8,9 +8,9 @@ import { getRoomType } from "@/lib/rooms-data";
  * GET /api/availability?room=<roomTypeId>&checkIn=YYYY-MM-DD&checkOut=YYYY-MM-DD
  *
  * `room` is a room-TYPE id (the site books by type, not physical room). When
- * both valid dates are supplied, returns the authoritative pool availability
- * for that type — free/total room counts, never "sold out" until every
- * physical room of the type is booked for the range.
+ * both valid dates are supplied, returns the authoritative availability for that
+ * type — free/total counts against `room_types.number_of_rooms`, only "sold out"
+ * once the whole type's inventory is booked for the range.
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -29,15 +29,7 @@ export async function GET(request: Request) {
 
   let availability = null;
   if (isValidISODate(checkIn) && isValidISODate(checkOut) && checkOut > checkIn) {
-    const result = await isTypeAvailable(roomTypeId, checkIn, checkOut);
-    // Strip server-only fields (roomId/roomName) before returning to the client.
-    availability = {
-      configured: result.configured,
-      available: result.available,
-      message: result.message,
-      freeCount: result.freeCount,
-      totalCount: result.totalCount,
-    };
+    availability = await isTypeAvailable(roomTypeId, checkIn, checkOut);
   }
 
   return NextResponse.json({ configured: true, availability });

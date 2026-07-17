@@ -21,34 +21,36 @@ const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-// Every read the site performs, with the file that owns it. The site books by
-// room TYPE (pool of physical rooms per type) — see lib/rooms-data.ts and
-// lib/bookings.ts isTypeAvailable.
+// Every read the site performs, with the file that owns it. Everything hangs off
+// `room_types` + `reservations.room_type_id`. The `rooms` table is mock data from
+// the reception system's testing and is only touched by the placeholderRoomId
+// shim, which exists solely because `reservations.room_id` is still NOT NULL.
 const READS = [
-  ["lib/rooms-data.ts listRooms/getRoomType", "rooms",
-    "id, name, day_payment, status, description, max_pax, room_type_id, room_types(name, description, max_pax), room_images(image_path)"],
-  ["lib/bookings.ts liveRoomsForType (pool)", "rooms",
-    "id, name, status"],
-  ["lib/bookings.ts reservations overlap", "reservations",
-    "room_id, status, check_in_date, check_out_date"],
-  ["lib/bookings.ts tenants occupancy", "tenants",
-    "room_id, status, check_in, check_out"],
+  ["lib/rooms-data.ts listRooms/getRoomType (catalogue)", "room_types",
+    "id, name, description, max_pax, number_of_rooms, price"],
+  ["lib/bookings.ts declaredRoomCount (inventory)", "room_types",
+    "number_of_rooms"],
+  ["lib/bookings.ts occupiedCount (bookings per type)", "reservations",
+    "status, room_type_id, check_in_date, check_out_date"],
+  ["lib/bookings.ts placeholderRoomId (SHIM — delete when room_id is nullable)", "rooms",
+    "id"],
   ["app/account bookings list", "reservations",
-    "id, check_in_date, check_out_date, status, total_amount, created_at, rooms(name)"],
+    "id, check_in_date, check_out_date, status, total_amount, created_at, room_types(name)"],
   ["app/admin/reservations list", "reservations",
-    "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, total_amount, notes, created_at, rooms(name)"],
+    "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, total_amount, adults, children, notes, created_at, room_types(name)"],
   ["app/admin/manage calendar", "reservations",
-    "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, notes, rooms(name)"],
+    "id, tenant_name, tenant_email, tenant_phone, check_in_date, check_out_date, status, notes, room_types(name)"],
 ];
 
 // Columns the site WRITES (insert in app/book/actions.ts, update in
 // app/admin/manage/actions.ts) — verified against the DB's own schema instead
-// of test writes, so this script never touches live data.
+// of test writes, so this script never touches live data. `nationality` and
+// `national_id` are deliberately never written.
 const WRITE_COLUMNS = {
   reservations: [
-    "room_id", "tenant_name", "tenant_email", "tenant_phone",
-    "check_in_date", "check_out_date", "status", "total_amount",
-    "reference_number", "notes",
+    "room_type_id", "room_id", "tenant_name", "tenant_email", "tenant_phone",
+    "check_in_date", "check_out_date", "status", "total_amount", "adults",
+    "children", "reference_number", "notes",
   ],
 };
 

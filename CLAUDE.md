@@ -34,8 +34,14 @@ stay in sync with the resort's separate front-desk reservation system.
 
 The site reads its room catalogue and availability from the resort's **live
 reservation database** (Supabase project `phohqwreweaucsvsnodd`) — the same DB the
-front desk uses — and writes new website bookings back into it. Rooms are looped
-dynamically per-room (not hardcoded, not grouped by type).
+front desk uses — and writes new website bookings back into it.
+
+**The site sells room TYPES, never physical rooms.** A guest picks a type and dates;
+reception hands them an actual room at check-in. Everything hangs off `room_types` and
+`reservations.room_type_id`. **The `rooms` / `room_images` tables are mock data** left
+from the reception system's early testing — their prices, capacities and row counts are
+meaningless and must not be read (the one exception is the `placeholderRoomId` shim,
+below).
 
 **Booking is server-authoritative — the client is never trusted for availability.**
 
@@ -45,36 +51,49 @@ dynamically per-room (not hardcoded, not grouped by type).
    all Supabase calls happen in Server Components / Route Handlers / Server Actions and
    select non-PII columns. When env vars are absent, helpers return `null`/`[]` and the
    app degrades gracefully.
-2. **Room listing is by TYPE, not physical room** (`lib/rooms-data.ts`): `listRooms()` /
-   `getRoomType(id)` fetch all `rooms` rows joined with `room_types(name, description,
-   max_pax)` and `room_images(image_path)`, then group by `room_type_id` into one
-   `RoomListing` per type (`groupByType`). `id` on a `RoomListing` is a **room_type_id**,
-   not a `rooms.id`. `priceUsd` is the lowest `day_payment` among the type's live rooms;
-   `totalRooms` is the pool size. Live columns: `rooms.name` (NOT `room_name`),
-   `rooms.max_pax`/`room_types.max_pax` for capacity (the `pax` table is a guest
-   registry, not capacity). Run `node scripts/check-db-schema.mjs` when queries start
-   failing — the reception developer has renamed columns before.
-3. **Availability is pool-based** (`lib/bookings.ts` `isTypeAvailable`): given a
-   room-type id + dates, it fetches all live physical rooms of that type, finds which
-   ones have a blocking `reservations` row overlapping `[checkIn, checkOut)` (overlap
-   rule `existing.check_in_date < new.check_out AND existing.check_out_date >
-   new.check_in`) or — when `CONSIDER_TENANT_OCCUPANCY` — a long-term `tenants`
-   occupancy overlap, and returns one free physical room to assign plus free/total
-   counts. The type only shows "sold out" once every physical room is blocked. Reads
-   all reservations regardless of `notes` tag, so front-desk bookings block the site.
+2. **`room_types` IS the catalogue** (`lib/rooms-data.ts`): `listRooms()` /
+   `getRoomType(id)` read `room_types(id, name, description, max_pax, number_of_rooms,
+   price)` — one `RoomListing` per row, and nothing else. `priceUsd` =
+   `room_types.price`, `capacity` = `room_types.max_pax`, `totalRooms` =
+   `room_types.number_of_rooms`. A type is only listed when `price > 0 &&
+   number_of_rooms > 0`, so half-finished rows never reach a guest as a $0 room.
+   `room_types` has **no image column yet**, so every type falls back to a shared photo
+   (`FALLBACK_ROOM_IMAGE`) — `room_images` is keyed by physical room and is mock. Run
+   `node scripts/check-db-schema.mjs` when queries start failing — the reception
+   developer has renamed columns before.
+3. **Availability is inventory-based** (`lib/bookings.ts` `isTypeAvailable`): the type's
+   `number_of_rooms` is the inventory. It counts blocking `reservations` rows for that
+   `room_type_id` overlapping `[checkIn, checkOut)` (overlap rule
+   `existing.check_in_date < new.check_out AND existing.check_out_date > new.check_in`)
+   and reports `number_of_rooms - occupied` free. Reads all reservations regardless of
+   `notes` tag, so front-desk bookings block the site.
+
+   ⚠️ **Reservations with a NULL `room_type_id` are invisible to this count** (5 legacy
+   rows today). The reception app must always populate `room_type_id`, or a front-desk
+   booking won't block the website.
+
+   ⚠️ **`reservations.room_id` is still NOT NULL** (FK → `rooms.id`), so a booking can't
+   be saved without naming a physical room even though the guest only chose a type. Until
+   the reception developer drops that constraint, `placeholderRoomId()` attaches an
+   arbitrary `rooms` row of that type purely to satisfy it. **The value is meaningless —
+   read `room_type_id`, not `room_id`, on website bookings.** Delete the shim (and the
+   `room_id` line in `actions.ts`) the moment the column goes nullable.
 4. **Status rules are centralised in `lib/types.ts`** (`HIDDEN_ROOM_STATUSES`,
    `NON_BLOCKING_RESERVATION_STATUSES`, `NON_BLOCKING_TENANT_STATUSES`,
    `NEW_RESERVATION_STATUS`, `WEBSITE_NOTES_TAG`). They are lenient for display and conservative for
    availability; **confirm the real status strings with the reception-system developer**
    and adjust them in that one place.
 5. `app/book/actions.ts` (`"use server"`) re-validates every field, re-checks
-   `isTypeAvailable`, computes `total_amount = (lowest) day_payment × nights`, and
-   inserts into `reservations` against the assigned physical `room_id`. The live table
-   has **no `source` column** — website bookings are tagged with `WEBSITE_NOTES_TAG`
-   inside `notes` instead. A Postgres `23P01` (exclusion_violation) means another
-   booking just took that specific physical room in a race; the action re-checks the
-   pool and retries with the next free room (up to `MAX_ASSIGN_ATTEMPTS`) before
-   reporting the type sold out.
+   `isTypeAvailable`, computes `total_amount = room_types.price × nights`, and inserts
+   into `reservations` with **`room_type_id`** — the guest's real choice — plus the
+   `room_id` placeholder described above. The guest is never shown a physical room name.
+   The live table has **no `source` column**, so website bookings are tagged with
+   `WEBSITE_NOTES_TAG` inside `notes`. Guest counts are written to the `adults` /
+   `children` columns. `total_amount` is what the guest pays — the live schema has
+   no `vat_amount` / `grand_total` columns.
+   **`nationality` / `national_id` are never collected or written** — the site does not
+   handle national ID credentials. `/account` and `/admin/**` display `room_types(name)`,
+   never `rooms(name)`.
 
 **Auth (`lib/supabase-auth*.ts`, `proxy.ts`):** Supabase Auth (anon key, `NEXT_PUBLIC_`)
 powers two roles. Guests self-signup at `/signup` and see their own bookings at

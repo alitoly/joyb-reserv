@@ -2,23 +2,24 @@
 
 /**
  * A room TYPE as the website displays and books it (view-model — no PII).
- * The site books by type, not by physical room: guests pick a type + dates,
- * and the server assigns any free physical room from that type's pool. Built
- * in `lib/rooms-data.ts` by grouping `rooms` rows by `room_type_id` and
- * joining `room_types`, `room_images`.
+ * The site books by type, never by physical room: guests pick a type + dates,
+ * and reception hands over an actual room at check-in. Built in
+ * `lib/rooms-data.ts` straight from a `room_types` row — that table is the
+ * source of truth for description, capacity, price and inventory. Only the
+ * imagery comes from `rooms`/`room_images`.
  */
 export interface RoomListing {
   id: string; // room_types.id (stringified)
   name: string; // room_types.name
   typeName: string; // same as `name` — kept as a separate field since callers
   // (Kicker, facilitiesForType, meta titles) key off "type"
-  capacity: number | null; // room_types.max_pax (falls back to the highest rooms.max_pax among members)
-  priceUsd: number; // lowest rooms.day_payment among this type's live rooms
-  description: string | null; // room_types.description (falls back to a member room's description)
+  capacity: number | null; // room_types.max_pax (null when 0/unset)
+  priceUsd: number; // room_types.price — the nightly rate the site charges
+  description: string | null; // room_types.description
   imageUrl: string; // first resolved Storage/public URL (or fallback)
   images: string[]; // all resolved image URLs (gallery); always ≥ 1 (fallback)
   imageAlt: string;
-  totalRooms: number; // count of live physical rooms of this type — the pool size
+  totalRooms: number; // room_types.number_of_rooms — the inventory for this type
 }
 
 /** Result of an availability lookup for a room TYPE + date range. `freeCount`/

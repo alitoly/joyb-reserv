@@ -10,18 +10,21 @@ export const metadata: Metadata = {
     "Get in touch with JoyB Resort in Zanzibar, minutes from the airport. Questions about rooms, transfers, or your stay; we're happy to help.",
 };
 
+const MAPS_URL =
+  "https://www.google.com/maps/place/6%C2%B012'28.1%22S+39%C2%B012'55.2%22E/@-6.2073833,39.2152714,17z/data=!4m4!3m3!8m2!3d-6.2078099!4d39.2153358?hl=en&entry=ttu&g_ep=EgoyMDI2MDcxMy4wIKXMDSoASAFQAw%3D%3D";
+
 const DETAILS = [
   {
     icon: MapPinIcon,
     label: "Address",
     lines: ["Minutes from Zanzibar Airport", "Zanzibar, Tanzania"],
-    href: "https://maps.app.goo.gl/aag3trMGFzyjQMga9",
+    href: MAPS_URL,
   },
   {
     icon: PhoneIcon,
     label: "Phone & WhatsApp",
-    lines: ["+255 000 000 000"],
-    href: "tel:+255000000000",
+    lines: ["+255 670 117 777"],
+    href: "tel:+255670117777",
   },
   {
     icon: MailIcon,
@@ -97,7 +100,7 @@ export default function ContactPage() {
             {/* Google Maps embed */}
             <div className="overflow-hidden rounded-2xl ring-1 ring-charcoal/5">
               <iframe
-                src="https://maps.google.com/maps?q=JoyB+Resort+Zanzibar&output=embed&z=15"
+                src="https://maps.google.com/maps?q=-6.2078099,39.2153358&output=embed&z=16"
                 width="100%"
                 height="260"
                 style={{ border: 0, display: "block" }}
@@ -107,7 +110,7 @@ export default function ContactPage() {
                 title="JoyB Resort location on Google Maps"
               />
               <a
-                href="https://maps.app.goo.gl/aag3trMGFzyjQMga9"
+                href={MAPS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 bg-surface px-4 py-3 text-sm font-medium text-green transition-colors hover:text-green-strong"
