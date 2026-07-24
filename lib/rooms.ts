@@ -22,6 +22,7 @@ export const FACILITIES = [
   "Basic toiletries",
   "Fridge",
   "Kettle",
+  "Safe box",
 ] as const;
 
 /** Short facility labels for room cards and chips. */
@@ -32,11 +33,12 @@ export const FACILITY_LABELS = [
   "Toiletries",
   "Fridge",
   "Kettle",
+  "Safe box",
 ] as const;
 
 /** One sentence describing what every room includes. */
 export const FACILITIES_SENTENCE =
-  "Each room includes AC or fan, WiFi, towels, basic toiletries, a fridge, and a kettle.";
+  "Each room includes AC or fan, WiFi, towels, basic toiletries, a fridge, a kettle, and a safe box.";
 
 export const BED_SIZES = [
   { label: "Single bed", size: "3.5 ft x 6 ft" },
@@ -68,6 +70,7 @@ const ROOM_TYPE_PRESETS: Record<string, RoomTypePreset> = {
   "double/single": { size: "18 m² (approx.)", extras: ["Garden view"] },
   twin: { size: "20 m² (approx.)", extras: ["Two single beds", "Garden view"] },
   double: { size: "22 m² (approx.)", extras: ["Queen bed", "Garden view"] },
+  deluxe: { size: "26 m² (approx.)", extras: ["Sofa", "Queen bed", "Garden view"] },
   interconnected: {
     size: "38 m² (approx.)",
     extras: ["Two connected rooms", "Family friendly", "Garden view"],
