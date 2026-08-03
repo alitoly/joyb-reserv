@@ -157,7 +157,7 @@ export async function createBooking(
   }
 
   const nights = nightsBetween(checkIn, checkOut);
-  const { total } = calculatePrice(roomType.priceUsd, nights);
+  const { total } = calculatePrice(roomType.priceUsd, nights, adults + children);
 
   // The shared reservations table has no source column, so the website tag
   // rides in `notes`. Guest counts now have their own `adults`/`children`

@@ -82,7 +82,9 @@ export function RoomBookingForm({
   const datesValid =
     checkIn >= today && checkOut > checkIn && Boolean(checkIn && checkOut);
   const nights = datesValid ? nightsBetween(checkIn, checkOut) : 0;
-  const price = datesValid ? calculatePrice(room.priceUsd, nights) : null;
+  const price = datesValid
+    ? calculatePrice(room.priceUsd, nights, adults + children)
+    : null;
 
   // Keep check-out ahead of check-in (handled on change, not in an effect).
   function handleCheckIn(value: string) {
@@ -427,7 +429,8 @@ export function RoomBookingForm({
               <p className="mt-0.5 text-sm">
                 {nights} {nights === 1 ? "night" : "nights"} ·{" "}
                 <span className="text-ink-soft">
-                  ${room.priceUsd} × {nights}
+                  ${room.priceUsd} × {nights} = ${price.subtotal} + VAT $
+                  {price.vat}
                 </span>{" "}
                 ={" "}
                 <span className="font-display text-xl text-charcoal">

@@ -60,20 +60,20 @@ export default function AboutPage() {
         <Reveal>
           <Kicker>In the heart of Zanzibar</Kicker>
           <p className="mt-6 text-xl leading-relaxed text-charcoal">
-            JoyB began as a family home in the green heart of Zanzibar, a short
-            drive from the airport and the lanes of Stone Town.
+            In the heart of Zanzibar, JoyB began as a family home, a short
+            drive from the airport and the winding lanes of Stone Town.
           </p>
           <p className="mt-5 leading-relaxed text-ink-soft">
-            Over the years we grew to 17 rooms, a shaded garden terrace, and a
-            kitchen that smells of cardamom and fresh coffee. We never wanted a
-            big hotel. We wanted a quiet, green place where you could put your
-            phone down and remember what unhurried feels like. That’s still the
-            whole idea.
+            Over the years, we grew to 17 rooms and a shaded garden terrace.
+            We never wanted a big hotel; we wanted a quiet, green place where
+            you could put your phone down and remember what &ldquo;unhurried&rdquo;
+            feels like. That is still the whole idea.
           </p>
           <p className="mt-5 leading-relaxed text-ink-soft">
-            Today JoyB is still run by the same family, with a team from the
-            neighbourhood who know the island, the best route into town, and
-            exactly how you like your morning coffee by day three.
+            Today, JoyB is still run by the same family, supported by a team
+            from the neighbourhood who know the island inside out, from the
+            best routes into town to exactly how you like your morning coffee
+            by day three.
           </p>
         </Reveal>
       </Section>
