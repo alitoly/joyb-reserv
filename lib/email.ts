@@ -1,23 +1,30 @@
 import "server-only";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { formatLong } from "./dates";
 
 /**
- * Server-only reservation email. Notifies the resort manager so they can
- * manually confirm a website booking with the guest.
+ * Server-only reservation email, sent through Hostinger's SMTP mailbox
+ * (previously Resend). Notifies the resort manager so they can manually
+ * confirm a website booking with the guest.
  *
  * Secrets stay server-side (no `NEXT_PUBLIC_`):
- *   - RESEND_API_KEY       — Resend API key (required to actually send)
- *   - RESERVATION_TO_EMAIL — manager inbox (defaults to reservation@joybresort.com)
- *   - RESERVATION_FROM_EMAIL — verified sender on a Resend-verified domain
+ *   - SMTP_HOST / SMTP_PORT   — Hostinger SMTP (smtp.hostinger.com, 465)
+ *   - SMTP_USER / SMTP_PASS   — the sending mailbox and its password
+ *   - RESERVATION_TO_EMAIL    — manager inbox (defaults to reservation@joybresort.com)
+ *   - RESERVATION_FROM_EMAIL  — defaults to SMTP_USER; must be a mailbox that
+ *     SMTP_USER is allowed to send as on Hostinger
  *
- * When RESEND_API_KEY is absent the function no-ops with a warning, so local /
- * unconfigured environments still complete bookings (the row is already saved).
+ * When SMTP_USER/SMTP_PASS are absent the function no-ops with a warning, so
+ * local / unconfigured environments still complete bookings (the row is
+ * already saved).
  */
 
 const TO = process.env.RESERVATION_TO_EMAIL || "reservation@joybresort.com";
-const FROM = process.env.RESERVATION_FROM_EMAIL || "onboarding@resend.dev";
-const apiKey = process.env.RESEND_API_KEY;
+const SMTP_HOST = process.env.SMTP_HOST || "smtp.hostinger.com";
+const SMTP_PORT = Number(process.env.SMTP_PORT || 465);
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
+const FROM = process.env.RESERVATION_FROM_EMAIL || SMTP_USER || TO;
 
 export interface ReservationEmailPayload {
   reference: string;
@@ -35,10 +42,17 @@ export interface ReservationEmailPayload {
   notes: string | null;
 }
 
-let cached: Resend | null = null;
-function getResend(): Resend | null {
-  if (!apiKey) return null;
-  if (!cached) cached = new Resend(apiKey);
+let cached: nodemailer.Transporter | null = null;
+function getTransport(): nodemailer.Transporter | null {
+  if (!SMTP_USER || !SMTP_PASS) return null;
+  if (!cached) {
+    cached = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_PORT === 465,
+      auth: { user: SMTP_USER, pass: SMTP_PASS },
+    });
+  }
   return cached;
 }
 
@@ -56,10 +70,10 @@ const htmlRow = (label: string, value: string) =>
 export async function sendReservationEmail(
   p: ReservationEmailPayload,
 ): Promise<void> {
-  const resend = getResend();
-  if (!resend) {
+  const transport = getTransport();
+  if (!transport) {
     console.warn(
-      `RESEND_API_KEY not set — skipped manager email for booking ${p.reference}.`,
+      `SMTP_USER/SMTP_PASS not set — skipped manager email for booking ${p.reference}.`,
     );
     return;
   }
@@ -108,32 +122,34 @@ export async function sendReservationEmail(
       <p style="margin:16px 0 0;color:#4a4f48">Please confirm the booking with the guest.</p>
     </div>`;
 
-  const { error } = await resend.emails.send({
-    from: FROM,
-    to: TO,
-    replyTo: p.guestEmail,
-    subject,
-    text,
-    html,
-  });
-
-  if (error) {
+  try {
+    await transport.sendMail({
+      from: FROM,
+      to: TO,
+      replyTo: p.guestEmail,
+      subject,
+      text,
+      html,
+    });
+  } catch (error) {
     // Surface to the caller's try/catch so it's logged, but never blocks booking.
-    throw new Error(`Resend error: ${error.message}`);
+    throw new Error(
+      `SMTP error: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
 /**
  * Confirmation email to the guest who booked. Mirrors the manager email's
- * no-op behaviour when RESEND_API_KEY is absent, and never blocks a booking.
+ * no-op behaviour when SMTP credentials are absent, and never blocks a booking.
  */
 export async function sendGuestConfirmationEmail(
   p: ReservationEmailPayload,
 ): Promise<void> {
-  const resend = getResend();
-  if (!resend) {
+  const transport = getTransport();
+  if (!transport) {
     console.warn(
-      `RESEND_API_KEY not set — skipped guest email for booking ${p.reference}.`,
+      `SMTP_USER/SMTP_PASS not set — skipped guest email for booking ${p.reference}.`,
     );
     return;
   }
@@ -176,16 +192,18 @@ export async function sendGuestConfirmationEmail(
       <p style="margin:16px 0 0;color:#4a4f48">Our team will contact you shortly to confirm your booking.</p>
     </div>`;
 
-  const { error } = await resend.emails.send({
-    from: FROM,
-    to: p.guestEmail,
-    replyTo: TO,
-    subject,
-    text,
-    html,
-  });
-
-  if (error) {
-    throw new Error(`Resend error (guest email): ${error.message}`);
+  try {
+    await transport.sendMail({
+      from: FROM,
+      to: p.guestEmail,
+      replyTo: TO,
+      subject,
+      text,
+      html,
+    });
+  } catch (error) {
+    throw new Error(
+      `SMTP error (guest email): ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
