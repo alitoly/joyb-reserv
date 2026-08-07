@@ -52,7 +52,7 @@ export default function ContactPage() {
 
       <Section className="pb-16">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-14">
-          <Reveal className="rounded-[2rem] bg-surface p-6 ring-1 ring-charcoal/5 sm:p-9">
+          <Reveal className="bg-surface p-6 ring-1 ring-charcoal/5 sm:p-9">
             <h2 className="font-display text-2xl text-charcoal">
               Send a message
             </h2>
@@ -67,9 +67,9 @@ export default function ContactPage() {
               {DETAILS.map((d) => (
                 <li
                   key={d.label}
-                  className="flex items-start gap-4 rounded-2xl bg-surface p-5 ring-1 ring-charcoal/5"
+                  className="flex items-start gap-4 bg-surface p-5 ring-1 ring-charcoal/5"
                 >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green/10 text-green">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center bg-green/10 text-green">
                     <d.icon className="h-5 w-5" />
                   </span>
                   <div>
@@ -98,7 +98,7 @@ export default function ContactPage() {
             </ul>
 
             {/* Google Maps embed */}
-            <div className="overflow-hidden rounded-2xl ring-1 ring-charcoal/5">
+            <div className="overflow-hidden ring-1 ring-charcoal/5">
               <iframe
                 src="https://maps.google.com/maps?q=-6.2078099,39.2153358&output=embed&z=16"
                 width="100%"

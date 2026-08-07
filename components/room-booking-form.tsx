@@ -10,7 +10,7 @@ import { AvailabilityBanner, type AvailState } from "./availability-banner";
 import { AlertIcon, CheckIcon, SpinnerIcon } from "./icons";
 
 const fieldBase =
-  "mt-1.5 w-full rounded-xl border bg-surface px-4 py-3 text-charcoal transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-green";
+  "mt-1.5 w-full  border bg-surface px-4 py-3 text-charcoal transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-green";
 
 function fieldClass(invalid?: boolean) {
   return `${fieldBase} ${
@@ -133,11 +133,11 @@ export function RoomBookingForm({
   if (state.status === "success") {
     return (
       <div
-        className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 sm:p-10"
+        className="bg-surface p-8 ring-1 ring-charcoal/5 sm:p-10"
         role="status"
         aria-live="polite"
       >
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-green text-white">
+        <span className="flex h-14 w-14 items-center justify-center bg-green text-white">
           <CheckIcon className="h-7 w-7" />
         </span>
         <h2 className="mt-5 font-display text-3xl text-charcoal">
@@ -148,7 +148,7 @@ export function RoomBookingForm({
           will confirm by email shortly.
         </p>
 
-        <dl className="mt-7 grid gap-4 rounded-2xl bg-sand p-6 sm:grid-cols-2">
+        <dl className="mt-7 grid gap-4 bg-sand p-6 sm:grid-cols-2">
           <div>
             <dt className="text-sm text-ink-soft">Booking reference</dt>
             <dd className="font-display text-xl text-charcoal">
@@ -194,7 +194,7 @@ export function RoomBookingForm({
   return (
     <form
       action={formAction}
-      className="rounded-[2rem] bg-surface p-6 ring-1 ring-charcoal/5 sm:p-9"
+      className="bg-surface p-6 ring-1 ring-charcoal/5 sm:p-9"
       noValidate
     >
       {/* room.id is a room-TYPE id — the server assigns a specific physical room. */}
@@ -204,7 +204,7 @@ export function RoomBookingForm({
       {state.status === "error" && (
         <div
           role="alert"
-          className="mb-6 flex items-start gap-3 rounded-2xl bg-rust/10 p-4 text-rust-strong"
+          className="mb-6 flex items-start gap-3 bg-rust/10 p-4 text-rust-strong"
         >
           <AlertIcon className="mt-0.5 h-5 w-5 shrink-0" />
           <p className="text-sm font-medium">{state.message}</p>
@@ -421,7 +421,7 @@ export function RoomBookingForm({
       </fieldset>
 
       {/* Summary + submit */}
-      <div className="mt-8 rounded-2xl bg-sand p-5">
+      <div className="mt-8 bg-sand p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div aria-live="polite" className="text-ink-soft">
             <p className="font-medium text-charcoal">{room.name}</p>

@@ -24,7 +24,7 @@ export function AvailabilityBanner({ avail }: { avail: AvailState }) {
       )}
 
       {avail.kind === "unconfigured" && (
-        <p className="rounded-xl bg-sand-deep px-4 py-3 text-sm text-charcoal/80">
+        <p className="bg-sand-deep px-4 py-3 text-sm text-charcoal/80">
           Live availability isn&apos;t connected yet, but you can still send a
           request and we&apos;ll confirm by email.
         </p>
@@ -39,12 +39,12 @@ export function AvailabilityBanner({ avail }: { avail: AvailState }) {
 
       {avail.kind === "result" &&
         (avail.data.available ? (
-          <p className="flex items-center gap-2 rounded-xl bg-green/10 px-4 py-3 text-sm font-medium text-green-strong">
+          <p className="flex items-center gap-2 bg-green/10 px-4 py-3 text-sm font-medium text-green-strong">
             <CheckIcon className="h-5 w-5 shrink-0" />
             {avail.data.message}
           </p>
         ) : (
-          <div className="rounded-xl bg-rust/10 px-4 py-3 text-rust-strong">
+          <div className="bg-rust/10 px-4 py-3 text-rust-strong">
             <p className="flex items-center gap-2 text-sm font-medium">
               <AlertIcon className="h-5 w-5 shrink-0" />
               {avail.data.message}

@@ -25,7 +25,7 @@
   --color-background: var(--color-sand);
   --color-foreground: var(--color-ink);
 
-  --font-display: var(--font-marcellus);
+  --font-display: var(--font-outfit);
   --font-sans: var(--font-mulish);
 
   /* Semantic z-index scale */
@@ -52,13 +52,24 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Headings lean on the display family with balanced wrapping */
+/* Headings lean on the display family with balanced wrapping. Outfit is a
+   geometric sans, so it wants real weight and tighter tracking than the serif
+   this replaced: optical spacing opens up fast at display sizes. */
 h1,
 h2,
 h3 {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
   text-wrap: balance;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
+}
+
+/* The hero wordmark only. Tracking has to come in further still at this size,
+   and 800 is where Outfit stops feeling merely bold. */
+.display-xl {
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
 }
 
 p {
@@ -69,7 +80,6 @@ p {
 :focus-visible {
   outline: 2px solid var(--color-green);
   outline-offset: 2px;
-  border-radius: 4px;
 }
 
 /* Scroll-reveal: content is visible by default, motion only enhances it */
@@ -93,17 +103,19 @@ p {
   }
 }
 
-/* Slow ambient zoom for hero imagery */
+/* Hero photograph settles into its frame once on load, then stays put. One
+   authored moment beats a drift that never resolves. Default state is the
+   settled one, so reduced motion simply gets the finished image. */
 @media (prefers-reduced-motion: no-preference) {
-  @keyframes kenburns {
+  @keyframes settle {
     from {
-      transform: scale(1.05);
+      transform: scale(1.06);
     }
     to {
-      transform: scale(1.14);
+      transform: scale(1);
     }
   }
-  .animate-kenburns {
-    animation: kenburns 18s var(--ease-out-quint) forwards;
+  .animate-settle {
+    animation: settle 1.4s var(--ease-out-quint) both;
   }
 }

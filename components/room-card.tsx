@@ -17,7 +17,7 @@ export function RoomCard({
   return (
     <Link
       href={`/rooms/${room.id}`}
-      className="group flex h-full flex-col overflow-hidden rounded-3xl bg-surface shadow-[0_1px_3px_rgba(29,32,32,0.06)] ring-1 ring-charcoal/5 transition-shadow duration-300 hover:shadow-[0_18px_40px_-18px_rgba(29,32,32,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+      className="group flex h-full flex-col overflow-hidden bg-surface shadow-[0_1px_3px_rgba(29,32,32,0.06)] ring-1 ring-charcoal/5 transition-shadow duration-300 hover:shadow-[0_18px_40px_-18px_rgba(29,32,32,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
       aria-label={`View ${room.name} — $${room.priceUsd} per night`}
     >
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -29,7 +29,7 @@ export function RoomCard({
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
         />
-        <span className="absolute left-4 top-4 rounded-full bg-sand/95 px-3 py-1 text-xs font-semibold text-charcoal">
+        <span className="absolute left-4 top-4 bg-sand/95 px-3 py-1 text-xs font-semibold text-charcoal">
           {room.totalRooms} {room.totalRooms === 1 ? "room" : "rooms"}
         </span>
       </div>
@@ -44,7 +44,7 @@ export function RoomCard({
           {FACILITY_LABELS.slice(0, 4).map((f) => (
             <li
               key={f}
-              className="rounded-full bg-sand-deep px-3 py-1 text-xs font-medium text-charcoal/75"
+              className="bg-sand-deep px-3 py-1 text-xs font-medium text-charcoal/75"
             >
               {f}
             </li>

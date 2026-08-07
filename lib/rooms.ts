@@ -7,11 +7,8 @@
  * (availability). This module is presentation-only.
  */
 
-const unsplash = (id: string, w = 1200) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
-
-/** Shown when a room has no `image_path` in the database. */
-export const FALLBACK_ROOM_IMAGE = unsplash("photo-1611892440504-42a792e24d32");
+/** Shown when a room type has no photos of its own. */
+export const FALLBACK_ROOM_IMAGE = "/joyb_images/double-1.jpg";
 export const ROOM_IMAGE_ALT = "A bright, restful room at JoyB Resort";
 
 /** Full facility names for prose / detail sections. */
@@ -55,9 +52,29 @@ export const BED_SIZES_SENTENCE =
 //
 // The shared front-desk database has no per-room "size" or "facilities"
 // columns, so the room details page derives these from the room TYPE. These are
-// display-only defaults — adjust the copy here, not in the database. Lookups are
-// case-insensitive and fall back to sensible values for unknown types.
+// display-only defaults — adjust the copy here, not in the database.
+//
+// Lookups go through `typeKey`, NOT through the raw name. Reception writes
+// names like "Double Room", "Twin Room" and "Connecting room", which no exact
+// key would ever match, so the whole map used to fall through to the defaults
+// in silence. Keep matching on keywords so a rename at the front desk does not
+// quietly blank out a room's facilities again.
 // ---------------------------------------------------------------------------
+
+/**
+ * Reduce a live `room_types.name` to the key both maps below use. Order
+ * matters: a "Double/Single" room must be caught before the plain "double"
+ * test. Unknown types return "", which falls back to sensible defaults.
+ */
+function typeKey(typeName: string): string {
+  const name = typeName.trim().toLowerCase();
+  if (name.includes("delux")) return "deluxe";
+  if (name.includes("connect")) return "interconnected";
+  if (name.includes("twin")) return "twin";
+  if (name.includes("double") && name.includes("single")) return "double/single";
+  if (name.includes("double")) return "double";
+  return "";
+}
 
 interface RoomTypePreset {
   /** Approximate room footprint, shown on the details page. */
@@ -83,7 +100,7 @@ const DEFAULT_PRESET: RoomTypePreset = {
 };
 
 function presetForType(typeName: string): RoomTypePreset {
-  return ROOM_TYPE_PRESETS[typeName.trim().toLowerCase()] ?? DEFAULT_PRESET;
+  return ROOM_TYPE_PRESETS[typeKey(typeName)] ?? DEFAULT_PRESET;
 }
 
 /** Approximate size for a room type (presentation-only). */
@@ -94,4 +111,132 @@ export function roomSizeForType(typeName: string): string {
 /** Full facilities list for a room type: the shared base plus type extras. */
 export function facilitiesForType(typeName: string): string[] {
   return [...FACILITIES, ...presetForType(typeName).extras];
+}
+
+// ---------------------------------------------------------------------------
+// Room photography
+//
+// `room_types` has no image column, and `room_images` is keyed by physical room
+// and is mock data, so the site's imagery lives here, keyed by `typeKey` just
+// like the presets above. Photos are the resort's own, in `public/joyb_images/`.
+// ---------------------------------------------------------------------------
+
+export interface RoomPhoto {
+  src: string;
+  alt: string;
+}
+
+/**
+ * Every room shares the same bathroom design, and only three bathroom photos
+ * exist, so every type shows this same set. Swap in per-type shots here if the
+ * resort ever photographs them individually.
+ */
+export const BATHROOM_PHOTOS: readonly RoomPhoto[] = [
+  {
+    src: "/joyb_images/bathroom-1.jpg",
+    alt: "Private bathroom with a rain shower, polished ochre plaster walls, toilet and vanity",
+  },
+  {
+    src: "/joyb_images/bathroom-2.jpg",
+    alt: "Rain shower head and handheld shower against warm plaster walls",
+  },
+  {
+    src: "/joyb_images/bathroom-amenities.jpg",
+    alt: "Mirrored bathroom cabinet stocked with shampoo, conditioner and soap",
+  },
+];
+
+const ROOM_TYPE_PHOTOS: Record<string, readonly RoomPhoto[]> = {
+  deluxe: [
+    {
+      src: "/joyb_images/deluxe-1.jpg",
+      alt: "Deluxe room with a wide bed dressed in white linen, a kanga-cushioned daybed and woven wall discs",
+    },
+    {
+      src: "/joyb_images/deluxe-2.jpg",
+      alt: "The full length of the deluxe room, with a tea and coffee console and a mini fridge",
+    },
+    {
+      src: "/joyb_images/deluxe-3.jpg",
+      alt: "Daybed with kanga cushions beside an open wardrobe and glass doors onto the terrace",
+    },
+    {
+      src: "/joyb_images/deluxe-4.jpg",
+      alt: "Bed turned down with a petal welcome message and towel swans",
+    },
+    {
+      src: "/joyb_images/deluxe-5.jpg",
+      alt: "Crisp white pillows with a printed kanga cushion against a soft grey headboard",
+    },
+  ],
+  twin: [
+    {
+      src: "/joyb_images/twin-1.jpg",
+      alt: "Twin room with two carved wooden beds, kanga cushions and woven baskets on the wall",
+    },
+    {
+      src: "/joyb_images/twin-2.jpg",
+      alt: "The twin room seen through its doorway, name plate on the open door",
+    },
+    {
+      src: "/joyb_images/twin-3.jpg",
+      alt: "Corner of the twin room with a kettle, cups, bottled water and a mini fridge",
+    },
+  ],
+  double: [
+    {
+      src: "/joyb_images/double-1.jpg",
+      alt: "Double room with a soft grey headboard, kanga cushions and woven wall discs",
+    },
+    {
+      src: "/joyb_images/double-2.jpg",
+      alt: "The double room seen from the doorway, bed turned down with petals",
+    },
+    {
+      src: "/joyb_images/double-3.jpg",
+      alt: "Foot of the bed beside the tea tray, bottled water and mini fridge",
+    },
+  ],
+  interconnected: [
+    {
+      src: "/joyb_images/connecting-1.jpg",
+      alt: "Interconnected room with a wide bed, petal welcome message and Stone Town paintings",
+    },
+    {
+      src: "/joyb_images/connecting-2.jpg",
+      alt: "Bedroom with the door to its private bathroom standing open",
+    },
+    {
+      src: "/joyb_images/connecting-3.jpg",
+      alt: "Framed painting of the Stone Town waterfront on the bedroom wall",
+    },
+    {
+      src: "/joyb_images/connecting-4.jpg",
+      alt: "Wardrobe alcove with hanging space, a safe box and a full length mirror",
+    },
+  ],
+  // No photos of this type yet, so it borrows the two beds it actually has.
+  "double/single": [
+    {
+      src: "/joyb_images/double-1.jpg",
+      alt: "Double bed with a soft grey headboard and kanga cushions",
+    },
+    {
+      src: "/joyb_images/twin-3.jpg",
+      alt: "Single bed beside the tea tray, bottled water and mini fridge",
+    },
+  ],
+};
+
+const DEFAULT_PHOTOS: readonly RoomPhoto[] = [
+  { src: FALLBACK_ROOM_IMAGE, alt: ROOM_IMAGE_ALT },
+];
+
+/**
+ * The room's own photos, lead shot first. Bathrooms are `BATHROOM_PHOTOS` and
+ * are shown separately. Always returns at least one entry, so callers can
+ * safely take `[0]`.
+ */
+export function roomPhotosForType(typeName: string): readonly RoomPhoto[] {
+  return ROOM_TYPE_PHOTOS[typeKey(typeName)] ?? DEFAULT_PHOTOS;
 }

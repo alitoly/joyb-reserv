@@ -119,7 +119,7 @@ Used **only** to satisfy the `reservations.room_id` NOT NULL constraint during c
 | Other columns | — | ⚠️ Ignore |
 
 **Current Workaround:**
-- `room_types` has no image column, so every type falls back to `FALLBACK_ROOM_IMAGE` (a single shared photo).
+- `room_types` has no image column, so the resort's own photos are committed to `public/joyb_images/` and mapped per room type by `roomPhotosForType` (`lib/rooms.ts`). Bathrooms are a shared set, since every room's bathroom is the same design.
 - To enable per-type imagery, ask the reception developer for:
   - An `image_url` or `primary_image` column on `room_types`, **OR**
   - A dedicated `room_type_images` junction table

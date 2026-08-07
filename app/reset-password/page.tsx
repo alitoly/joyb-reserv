@@ -9,7 +9,7 @@ import { Kicker, Section } from "@/components/ui";
 import { Reveal } from "@/components/reveal";
 
 const fieldBase =
-  "mt-1.5 w-full rounded-xl border bg-surface px-4 py-3 text-charcoal transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-green border-charcoal/15 focus:border-green";
+  "mt-1.5 w-full  border bg-surface px-4 py-3 text-charcoal transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-green border-charcoal/15 focus:border-green";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -81,11 +81,11 @@ export default function ResetPasswordPage() {
         <Reveal delay={100} className="mt-8">
           {done ? (
             <div
-              className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5"
+              className="bg-surface p-8 ring-1 ring-charcoal/5"
               role="status"
               aria-live="polite"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-green text-white">
+              <span className="flex h-12 w-12 items-center justify-center bg-green text-white">
                 <CheckIcon className="h-6 w-6" />
               </span>
               <h2 className="mt-5 font-display text-2xl text-charcoal">
@@ -96,20 +96,20 @@ export default function ResetPasswordPage() {
               </p>
             </div>
           ) : !ready ? (
-            <div className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 text-ink-soft">
+            <div className="bg-surface p-8 ring-1 ring-charcoal/5 text-ink-soft">
               <SpinnerIcon className="h-6 w-6 text-green" />
               <p className="mt-3">Verifying your reset link…</p>
             </div>
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="rounded-[2rem] bg-surface p-6 ring-1 ring-charcoal/5 sm:p-9"
+              className="bg-surface p-6 ring-1 ring-charcoal/5 sm:p-9"
               noValidate
             >
               {error && (
                 <div
                   role="alert"
-                  className="mb-6 flex items-start gap-3 rounded-2xl bg-rust/10 p-4 text-rust-strong"
+                  className="mb-6 flex items-start gap-3 bg-rust/10 p-4 text-rust-strong"
                 >
                   <AlertIcon className="mt-0.5 h-5 w-5 shrink-0" />
                   <p className="text-sm font-medium">{error}</p>

@@ -116,7 +116,7 @@ export default async function ManagePage({
       <AdminNav className="mt-6" />
 
       {!isSupabaseConfigured ? (
-        <div className="mt-10 rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5">
+        <div className="mt-10 bg-surface p-8 ring-1 ring-charcoal/5">
           <p className="text-ink-soft">
             The reservation database isn&apos;t connected. Add the Supabase
             server keys to view bookings.

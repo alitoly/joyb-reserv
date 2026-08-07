@@ -1,14 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Marcellus, Mulish } from "next/font/google";
+import { Outfit, Mulish } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 
-const marcellus = Marcellus({
-  variable: "--font-marcellus",
+// Variable font: no `weight` here, so the whole 100-900 axis is available and
+// the display type can actually go bold.
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
-  weight: "400",
   display: "swap",
 });
 
@@ -51,12 +52,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${marcellus.variable} ${mulish.variable} h-full`}
+      className={`${outfit.variable} ${mulish.variable} h-full`}
     >
       <body className="min-h-full bg-sand text-ink flex flex-col">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-green focus:px-5 focus:py-2 focus:text-white"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:bg-green focus:px-5 focus:py-2 focus:text-white"
         >
           Skip to content
         </a>

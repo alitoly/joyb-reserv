@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getRoomType } from "@/lib/rooms-data";
-import { facilitiesForType } from "@/lib/rooms";
+import { BATHROOM_PHOTOS, facilitiesForType, roomPhotosForType } from "@/lib/rooms";
 import { getServerSupabase } from "@/lib/supabase-server";
 import { getSessionUser } from "@/lib/supabase-auth-server";
 import {
@@ -11,6 +10,7 @@ import {
   type GuestDefaults,
 } from "@/components/room-booking-form";
 import { Reveal } from "@/components/reveal";
+import { PhotoGrid } from "@/components/photo-grid";
 import { Kicker, Section } from "@/components/ui";
 import { CheckIcon } from "@/components/icons";
 
@@ -69,7 +69,11 @@ export default async function RoomDetailsPage({
 
   const defaultGuest = await guestDefaults();
   const facilities = facilitiesForType(room.typeName);
-  const [hero, ...thumbs] = room.images;
+  const roomPhotos = roomPhotosForType(room.typeName);
+  // Types carry different numbers of photos, so let the column count follow
+  // them rather than stranding a lone tile on a half-empty row.
+  const viewCols =
+    (roomPhotos.length - 1) % 3 === 0 ? "sm:grid-cols-3" : "sm:grid-cols-2";
 
   return (
     <Section className="py-12 sm:py-16" width="wide">
@@ -104,36 +108,35 @@ export default async function RoomDetailsPage({
             </p>
           </Reveal>
 
-          {/* Gallery */}
+          {/* One grid, so the viewer's next/previous walks the whole room. The
+              lead shot spans the full width; the rest fill complete rows. */}
           <Reveal delay={80} className="mt-7">
-            <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-sand-deep">
-              <Image
-                src={hero}
-                alt={room.imageAlt}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 55vw"
-                className="object-cover"
-              />
-            </div>
-            {thumbs.length > 0 && (
-              <ul className="mt-3 grid grid-cols-4 gap-3">
-                {thumbs.slice(0, 4).map((src, i) => (
-                  <li
-                    key={`${src}-${i}`}
-                    className="relative aspect-square overflow-hidden rounded-2xl bg-sand-deep"
-                  >
-                    <Image
-                      src={src}
-                      alt={`${room.name} — view ${i + 2}`}
-                      fill
-                      sizes="(max-width: 1024px) 22vw, 12vw"
-                      className="object-cover"
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
+            <PhotoGrid
+              photos={roomPhotos.map((photo, i) =>
+                i === 0
+                  ? { ...photo, className: "col-span-full aspect-[16/10]" }
+                  : photo,
+              )}
+              className={`grid grid-cols-2 gap-3 ${viewCols}`}
+              sizes="(max-width: 640px) 46vw, (max-width: 1024px) 30vw, 18vw"
+              priorityFirst
+            />
+          </Reveal>
+
+          {/* Every room has its own bathroom, and they share this design */}
+          <Reveal delay={100} className="mt-10">
+            <h2 className="font-display text-2xl text-charcoal">
+              Your private bathroom
+            </h2>
+            <p className="mt-2 max-w-2xl leading-relaxed text-ink-soft">
+              Every room has its own bathroom with a rain shower, hot water, and
+              fresh towels and toiletries waiting for you.
+            </p>
+            <PhotoGrid
+              photos={BATHROOM_PHOTOS}
+              className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3"
+              sizes="(max-width: 640px) 46vw, (max-width: 1024px) 30vw, 18vw"
+            />
           </Reveal>
 
           {/* Description */}
@@ -157,7 +160,7 @@ export default async function RoomDetailsPage({
                   key={item}
                   className="flex items-start gap-3 text-ink-soft"
                 >
-                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green/10 text-green">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center bg-green/10 text-green">
                     <CheckIcon className="h-4 w-4" />
                   </span>
                   {item}

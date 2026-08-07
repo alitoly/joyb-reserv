@@ -5,7 +5,7 @@ import { Button } from "./ui";
 import { CheckIcon } from "./icons";
 
 const fieldClass =
-  "mt-1.5 w-full rounded-xl border border-charcoal/15 bg-surface px-4 py-3 text-charcoal placeholder:text-ink-soft/60 transition-colors focus:border-green focus:outline-none focus-visible:outline-2 focus-visible:outline-green";
+  "mt-1.5 w-full  border border-charcoal/15 bg-surface px-4 py-3 text-charcoal placeholder:text-ink-soft/60 transition-colors focus:border-green focus:outline-none focus-visible:outline-2 focus-visible:outline-green";
 
 /**
  * Contact form — UI only for now. On submit it shows a confirmation state
@@ -16,8 +16,8 @@ export function ContactForm() {
 
   if (sent) {
     return (
-      <div className="rounded-2xl bg-green/10 p-8 text-center">
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green text-white">
+      <div className="bg-green/10 p-8 text-center">
+        <span className="mx-auto flex h-12 w-12 items-center justify-center bg-green text-white">
           <CheckIcon className="h-6 w-6" />
         </span>
         <h3 className="mt-4 font-display text-2xl text-charcoal">

@@ -1,10 +1,10 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
-type Variant = "primary" | "gold" | "outline";
+type Variant = "primary" | "gold" | "outline" | "light";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold tracking-wide transition-colors duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold tracking-wide transition-colors duration-200 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60";
 
 const variants: Record<Variant, string> = {
   primary:
@@ -12,6 +12,9 @@ const variants: Record<Variant, string> = {
   gold: "bg-gold text-charcoal hover:bg-gold-strong focus-visible:outline-gold-strong",
   outline:
     "border border-charcoal/20 bg-transparent text-charcoal hover:border-green hover:text-green focus-visible:outline-green",
+  // For controls sitting on photography, where brand color would disappear.
+  light:
+    "bg-sand text-charcoal hover:bg-white focus-visible:outline-white",
 };
 
 export function buttonClass(variant: Variant = "primary", extra = "") {

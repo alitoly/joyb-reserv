@@ -9,11 +9,8 @@ export const metadata: Metadata = {
     "JoyB Resort is a family-run garden guesthouse in the heart of Zanzibar, minutes from the airport, built on warm Swahili hospitality.",
 };
 
-// Neutral placeholder imagery (non-coastal). Swap for real resort photos later.
-const aboutImg =
-  "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=1600&q=80";
-const detailImg =
-  "https://images.unsplash.com/photo-1593696140826-c58b021acf8b?auto=format&fit=crop&w=1200&q=80";
+const aboutImg = "/joyb_images/room-block.jpg";
+const detailImg = "/joyb_images/reception.jpg";
 
 const VALUES = [
   {
@@ -33,23 +30,29 @@ const VALUES = [
 export default function AboutPage() {
   return (
     <>
-      <section className="relative isolate min-h-[58vh] w-full overflow-hidden">
+      <section className="relative isolate -mt-20 flex min-h-[80vh] w-full items-end overflow-hidden">
         <Image
           src={aboutImg}
-          alt="A large leafy tree with sunlight filtering through its canopy"
+          alt="Coral stone room fronts with red shutters, shaded by old mango trees"
           fill
           priority
           sizes="100vw"
           className="-z-10 object-cover"
         />
+        {/* Same treatment as the home hero, tuned to this photograph: sky
+            shows through the canopy here, so the wash is a few points heavier
+            than the home page needs to clear 3:1 on the headline. */}
+        <div className="absolute inset-0 -z-10 bg-charcoal/20" aria-hidden="true" />
         <div
-          className="absolute inset-0 -z-10 bg-gradient-to-t from-charcoal/75 to-charcoal/25"
+          className="absolute inset-0 -z-10 bg-gradient-to-b from-charcoal/35 from-0% via-charcoal/10 via-35% to-charcoal/95 to-100%"
           aria-hidden="true"
         />
-        <Section className="flex min-h-[58vh] flex-col justify-end pb-14 pt-28">
-          <div className="max-w-2xl text-sand">
-            <p className="font-medium tracking-wide text-gold">Our story</p>
-            <h1 className="mt-3 font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.04] text-white">
+        <Section className="pt-32 pb-16">
+          <div className="max-w-4xl">
+            <p className="text-sm tracking-[0.2em] text-white/80 uppercase">
+              Our story
+            </p>
+            <h1 className="mt-4 font-display text-[clamp(2.5rem,7vw,5.5rem)] leading-[0.98] tracking-[-0.03em] text-white">
               A little garden guesthouse in Zanzibar
             </h1>
           </div>
@@ -64,7 +67,8 @@ export default function AboutPage() {
             drive from the airport and the winding lanes of Stone Town.
           </p>
           <p className="mt-5 leading-relaxed text-ink-soft">
-            Over the years, we grew to 17 rooms and a shaded garden terrace.
+            Over the years, we grew to 17 rooms around a pool, with a restaurant
+            under the mango trees and a juice bar beside the water.
             We never wanted a big hotel; we wanted a quiet, green place where
             you could put your phone down and remember what &ldquo;unhurried&rdquo;
             feels like. That is still the whole idea.
@@ -80,10 +84,10 @@ export default function AboutPage() {
 
       <Section className="pb-16">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-          <Reveal className="relative aspect-[4/3] overflow-hidden rounded-3xl">
+          <Reveal className="relative aspect-[4/3] overflow-hidden">
             <Image
               src={detailImg}
-              alt="A calm, bright sitting room with simple, comfortable furniture"
+              alt="The reception desk at JoyB, a carved wooden bureau with two Zanzibari chairs beside it"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
@@ -103,7 +107,7 @@ export default function AboutPage() {
       </Section>
 
       <Section className="pb-8">
-        <Reveal className="rounded-[2rem] bg-green px-6 py-16 text-center sm:px-10">
+        <Reveal className="bg-green px-6 py-16 text-center sm:px-10">
           <h2 className="mx-auto max-w-2xl text-[clamp(1.8rem,3.5vw,2.6rem)] leading-tight text-white">
             Come stay with us
           </h2>

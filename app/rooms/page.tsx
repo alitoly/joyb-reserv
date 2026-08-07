@@ -62,7 +62,7 @@ export default async function RoomsPage() {
       {/* Facilities + Bed sizes */}
       <Section className="py-12">
         <div className="grid gap-7 lg:grid-cols-2">
-          <Reveal className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 sm:p-12">
+          <Reveal className="bg-surface p-8 ring-1 ring-charcoal/5 sm:p-12">
             <h2 className="font-display text-3xl text-charcoal">In every room</h2>
             <p className="mt-3 max-w-2xl leading-relaxed text-ink-soft">
               {FACILITIES_SENTENCE}
@@ -70,7 +70,7 @@ export default async function RoomsPage() {
             <ul className="mt-8 grid gap-x-8 gap-y-4 sm:grid-cols-2">
               {FACILITIES.map((item) => (
                 <li key={item} className="flex items-start gap-3 text-ink-soft">
-                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green/10 text-green">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center bg-green/10 text-green">
                     <CheckIcon className="h-4 w-4" />
                   </span>
                   {item}
@@ -79,7 +79,7 @@ export default async function RoomsPage() {
             </ul>
           </Reveal>
 
-          <Reveal delay={120} className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5 sm:p-10">
+          <Reveal delay={120} className="bg-surface p-8 ring-1 ring-charcoal/5 sm:p-10">
             <h2 className="font-display text-3xl text-charcoal">Bed sizes</h2>
             <table className="mt-6 w-full text-left text-sm">
               <thead>

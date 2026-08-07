@@ -14,6 +14,13 @@ const NAV = [
   { href: "/contact", label: "Contact" },
 ];
 
+/**
+ * Routes that open with a full-bleed photograph. Only these can carry a
+ * transparent header with light type; everywhere else the page starts on sand
+ * and the header has to be solid from the first pixel or the links vanish.
+ */
+const HERO_PAGES = new Set(["/", "/about"]);
+
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -43,18 +50,23 @@ export function SiteHeader() {
     ? { href: "/account", label: "My account" }
     : { href: "/login", label: "Sign in" };
 
+  // Light type on the photograph, dark type once the page scrolls onto sand.
+  const overHero = HERO_PAGES.has(pathname) && !scrolled && !open;
+
   return (
     <header
       className={`sticky top-0 z-[var(--z-header)] transition-colors duration-300 ${
-        scrolled || open
-          ? "border-b border-charcoal/10 bg-sand/90 backdrop-blur"
-          : "border-b border-transparent bg-transparent"
+        overHero
+          ? "bg-transparent"
+          : "border-b border-charcoal/10 bg-sand/90 backdrop-blur"
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-        <Logo />
+      {/* Full width, not centred in a container: the mark sits against the
+          left edge of the viewport the way the reference does. */}
+      <div className="flex w-full items-center gap-4 px-5 py-3 sm:px-8">
+        <Logo className={overHero ? "drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)]" : ""} />
 
-        <nav aria-label="Primary" className="hidden md:block">
+        <nav aria-label="Primary" className="hidden flex-1 justify-center md:flex">
           <ul className="flex items-center gap-1">
             {NAV.map((item) => {
               const active =
@@ -66,10 +78,14 @@ export function SiteHeader() {
                   <Link
                     href={item.href}
                     aria-current={active ? "page" : undefined}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 ${
-                      active
-                        ? "text-green"
-                        : "text-charcoal/70 hover:text-charcoal"
+                    className={`px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 ${
+                      overHero
+                        ? active
+                          ? "text-white"
+                          : "text-white/75 hover:text-white"
+                        : active
+                          ? "text-green"
+                          : "text-charcoal/70 hover:text-charcoal"
                     }`}
                   >
                     {item.label}
@@ -80,21 +96,27 @@ export function SiteHeader() {
           </ul>
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="ml-auto hidden items-center gap-2 md:flex">
           <Link
             href={authLink.href}
-            className="rounded-full px-4 py-2 text-sm font-medium text-charcoal/70 transition-colors duration-200 hover:text-charcoal"
+            className={`px-4 py-2 text-sm font-medium transition-colors duration-200 ${
+              overHero
+                ? "text-white/75 hover:text-white"
+                : "text-charcoal/70 hover:text-charcoal"
+            }`}
           >
             {authLink.label}
           </Link>
-          <ButtonLink href="/book" variant="primary">
+          <ButtonLink href="/book" variant={overHero ? "light" : "primary"}>
             Book now
           </ButtonLink>
         </div>
 
         <button
           type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full text-charcoal md:hidden cursor-pointer"
+          className={`ml-auto inline-flex h-11 w-11 items-center justify-center md:hidden cursor-pointer ${
+            overHero ? "text-white" : "text-charcoal"
+          }`}
           aria-expanded={open}
           aria-controls="mobile-nav"
           aria-label={open ? "Close menu" : "Open menu"}
@@ -138,11 +160,11 @@ export function SiteHeader() {
                     href={item.href}
                     onClick={() => setOpen(false)}
                     aria-current={active ? "page" : undefined}
-                    className={`block rounded-xl px-4 py-3 text-base font-medium ${
-                      active
-                        ? "bg-sand-deep text-green"
-                        : "text-charcoal/80 hover:bg-sand-deep"
-                    }`}
+                    className={`block px-4 py-3 text-base font-medium ${
+ active
+ ? "bg-sand-deep text-green"
+ : "text-charcoal/80 hover:bg-sand-deep"
+ }`}
                   >
                     {item.label}
                   </Link>
@@ -153,7 +175,7 @@ export function SiteHeader() {
               <Link
                 href={authLink.href}
                 onClick={() => setOpen(false)}
-                className="block rounded-xl px-4 py-3 text-base font-medium text-charcoal/80 hover:bg-sand-deep"
+                className="block px-4 py-3 text-base font-medium text-charcoal/80 hover:bg-sand-deep"
               >
                 {authLink.label}
               </Link>

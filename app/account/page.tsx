@@ -89,13 +89,13 @@ export default async function AccountPage() {
       </div>
 
       {!isSupabaseConfigured ? (
-        <div className="mt-10 rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5">
+        <div className="mt-10 bg-surface p-8 ring-1 ring-charcoal/5">
           <p className="text-ink-soft">
             The reservation database isn&apos;t connected yet.
           </p>
         </div>
       ) : bookings.length === 0 ? (
-        <div className="mt-10 rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5">
+        <div className="mt-10 bg-surface p-8 ring-1 ring-charcoal/5">
           <p className="text-ink-soft">
             You don&apos;t have any bookings yet.{" "}
             <Link href="/rooms" className="font-medium text-green hover:underline">
@@ -111,7 +111,7 @@ export default async function AccountPage() {
             return (
               <li
                 key={b.id}
-                className="rounded-[1.5rem] bg-surface p-6 ring-1 ring-charcoal/5"
+                className="bg-surface p-6 ring-1 ring-charcoal/5"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -123,11 +123,11 @@ export default async function AccountPage() {
                     </p>
                   </div>
                   <span
-                    className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
-                      cancelled
-                        ? "bg-sand-deep text-ink-soft line-through"
-                        : "bg-green/10 text-green"
-                    }`}
+                    className={`inline-flex px-3 py-1 text-xs font-medium ${
+ cancelled
+ ? "bg-sand-deep text-ink-soft line-through"
+ : "bg-green/10 text-green"
+ }`}
                   >
                     {b.status ?? "—"}
                   </span>

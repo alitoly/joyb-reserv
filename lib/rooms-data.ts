@@ -1,6 +1,6 @@
 import { getServerSupabase } from "./supabase-server";
 import type { RoomListing } from "./types";
-import { FALLBACK_ROOM_IMAGE } from "./rooms";
+import { roomPhotosForType } from "./rooms";
 
 /**
  * The room catalogue. `room_types` is the ONLY source — description, capacity
@@ -13,9 +13,9 @@ import { FALLBACK_ROOM_IMAGE } from "./rooms";
  * TYPE; reception hands the guest a physical room at check-in.
  *
  * Imagery: `room_images` is keyed by physical room, so it is mock too and is not
- * used. Every type currently falls back to a shared image — `room_types` has no
- * image column yet. Ask the reception developer for one (or a
- * `room_type_images` table) to give each type its own photo.
+ * used, and `room_types` has no image column. Photos are committed to the repo
+ * and keyed by type name in `photosForType` (`lib/rooms.ts`) — the one thing
+ * here that does not come from the database.
  *
  * Server-only (uses the service-role client).
  */
@@ -43,6 +43,7 @@ function isSellable(row: RoomTypeRow): boolean {
 function toListing(row: RoomTypeRow): RoomListing {
   const typeName = row.name?.trim() || "Room";
   const maxPax = Number(row.max_pax ?? 0);
+  const [lead] = roomPhotosForType(typeName);
 
   return {
     id: String(row.id),
@@ -51,9 +52,8 @@ function toListing(row: RoomTypeRow): RoomListing {
     capacity: maxPax > 0 ? maxPax : null,
     priceUsd: Number(row.price ?? 0),
     description: row.description?.trim() || null,
-    imageUrl: FALLBACK_ROOM_IMAGE,
-    images: [FALLBACK_ROOM_IMAGE],
-    imageAlt: `${typeName} at JoyB Resort`,
+    imageUrl: lead.src,
+    imageAlt: lead.alt,
     totalRooms: Number(row.number_of_rooms ?? 0),
   };
 }

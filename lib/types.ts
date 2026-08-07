@@ -5,8 +5,8 @@
  * The site books by type, never by physical room: guests pick a type + dates,
  * and reception hands over an actual room at check-in. Built in
  * `lib/rooms-data.ts` straight from a `room_types` row — that table is the
- * source of truth for description, capacity, price and inventory. Only the
- * imagery comes from `rooms`/`room_images`.
+ * source of truth for description, capacity, price and inventory. Imagery is
+ * not in the database at all: it comes from `photosForType` in `lib/rooms.ts`.
  */
 export interface RoomListing {
   id: string; // room_types.id (stringified)
@@ -16,9 +16,8 @@ export interface RoomListing {
   capacity: number | null; // room_types.max_pax (null when 0/unset)
   priceUsd: number; // room_types.price — the nightly rate the site charges
   description: string | null; // room_types.description
-  imageUrl: string; // first resolved Storage/public URL (or fallback)
-  images: string[]; // all resolved image URLs (gallery); always ≥ 1 (fallback)
-  imageAlt: string;
+  imageUrl: string; // lead photo for the type — the room grid's card image
+  imageAlt: string; // description of that photo, not a generic label
   totalRooms: number; // room_types.number_of_rooms — the inventory for this type
 }
 

@@ -57,8 +57,12 @@ below).
    `room_types.price`, `capacity` = `room_types.max_pax`, `totalRooms` =
    `room_types.number_of_rooms`. A type is only listed when `price > 0 &&
    number_of_rooms > 0`, so half-finished rows never reach a guest as a $0 room.
-   `room_types` has **no image column yet**, so every type falls back to a shared photo
-   (`FALLBACK_ROOM_IMAGE`) — `room_images` is keyed by physical room and is mock. Run
+   `room_types` has **no image column yet** and `room_images` is keyed by physical room
+   and is mock, so photography is committed to the repo (`public/joyb_images/`) and
+   mapped per room TYPE by `roomPhotosForType` in `lib/rooms.ts`. That lookup and the
+   facilities/size presets both key off `typeKey()`, which matches on **keywords**
+   because reception writes names like "Double Room" and "Connecting room" that no
+   exact key matches. Add a new type's photos there, not in the database. Run
    `node scripts/check-db-schema.mjs` when queries start failing — the reception
    developer has renamed columns before.
 3. **Availability is inventory-based** (`lib/bookings.ts` `isTypeAvailable`): the type's
@@ -115,8 +119,23 @@ fallback image) — it no longer defines inventory.
 Light theme only, driven by committed brand colors (the logo palette). Tokens are
 defined as Tailwind v4 `@theme` variables in `app/globals.css` (`bg-green`,
 `text-gold`, `text-charcoal`, `bg-sand`, etc.) — use those utilities, not raw hexes.
-Fonts: Marcellus (display, `font-display`) + Mulish (body, `font-sans`) via
-`next/font/google` in `app/layout.tsx`.
+Fonts: **Outfit** (display, `font-display`, variable weight so headings can go 700
+and the hero 800) + Mulish (body, `font-sans`) via `next/font/google` in
+`app/layout.tsx`.
+
+**Everything is square.** There is no border radius anywhere on this site: no
+`rounded-*` utilities on images, cards, panels, inputs or buttons, and no
+`border-radius` on the focus ring. Adding one back breaks the shape system.
+
+**Photographic heroes** (`/` and `/about`) run full bleed under a transparent
+header, which is why they carry `-mt-20` (the header is exactly 80px) and a two
+part scrim: a flat wash plus a bottom weighted gradient. Those scrim values are
+**measured against the actual image**, not chosen by eye. Both photos are bright
+enough that centred white type failed WCAG against their blown highlights, so the
+type sits low over the darkest band. If you swap a hero image, re-measure: sample
+the pixels behind the headline and confirm 3:1 for display type, 4.5:1 for the
+subtext. `components/site-header.tsx` keys off `HERO_PAGES` to decide whether it
+can render transparent with light type.
 
 Two skills informed the UI and are worth re-reading before significant design work:
 `.claude/skills/ui-ux-pro-max` (run via `py .claude/skills/.../search.py`) and

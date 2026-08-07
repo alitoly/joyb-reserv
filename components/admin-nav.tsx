@@ -23,11 +23,11 @@ export function AdminNav({ className = "" }: { className?: string }) {
             key={l.href}
             href={l.href}
             aria-current={active ? "page" : undefined}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              active
-                ? "bg-green text-white"
-                : "bg-surface text-charcoal ring-1 ring-charcoal/15 hover:ring-green"
-            }`}
+            className={` px-4 py-2 text-sm font-medium transition-colors ${
+ active
+ ? "bg-green text-white"
+ : "bg-surface text-charcoal ring-1 ring-charcoal/15 hover:ring-green"
+ }`}
           >
             {l.label}
           </Link>

@@ -74,7 +74,7 @@ export function BookingsCalendar({
   return (
     <div className="mt-8 grid gap-8 lg:grid-cols-[1.6fr_1fr]">
       {/* Calendar */}
-      <div className="rounded-[2rem] bg-surface p-4 ring-1 ring-charcoal/5 sm:p-6">
+      <div className="bg-surface p-4 ring-1 ring-charcoal/5 sm:p-6">
         <div className="flex items-center justify-between gap-4">
           <h2 className="font-display text-2xl text-charcoal">
             {MONTH_NAMES[monthNum - 1]} {year}
@@ -83,14 +83,14 @@ export function BookingsCalendar({
             <Link
               href={`/admin/manage?month=${shiftMonth(month, -1)}`}
               aria-label="Previous month"
-              className="flex h-9 w-9 items-center justify-center rounded-full ring-1 ring-charcoal/15 text-charcoal transition-colors hover:bg-sand-deep"
+              className="flex h-9 w-9 items-center justify-center ring-1 ring-charcoal/15 text-charcoal transition-colors hover:bg-sand-deep"
             >
               ←
             </Link>
             <Link
               href={`/admin/manage?month=${shiftMonth(month, 1)}`}
               aria-label="Next month"
-              className="flex h-9 w-9 items-center justify-center rounded-full ring-1 ring-charcoal/15 text-charcoal transition-colors hover:bg-sand-deep"
+              className="flex h-9 w-9 items-center justify-center ring-1 ring-charcoal/15 text-charcoal transition-colors hover:bg-sand-deep"
             >
               →
             </Link>
@@ -108,7 +108,7 @@ export function BookingsCalendar({
         <div className="mt-1 grid grid-cols-7 gap-1">
           {cells.map((day, i) => {
             if (day == null)
-              return <div key={`b-${i}`} className="min-h-20 rounded-xl" />;
+              return <div key={`b-${i}`} className="min-h-20" />;
             const dayISO = `${month}-${pad(day)}`;
             const dayBookings = bookings.filter((b) => coversDay(b, dayISO));
             const isSelected = selected === day;
@@ -117,22 +117,22 @@ export function BookingsCalendar({
                 key={dayISO}
                 type="button"
                 onClick={() => setSelected(day)}
-                className={`min-h-20 rounded-xl p-1.5 text-left align-top ring-1 transition-colors ${
-                  isSelected
-                    ? "bg-green/10 ring-green"
-                    : "bg-sand ring-transparent hover:ring-charcoal/15"
-                }`}
+                className={`min-h-20 p-1.5 text-left align-top ring-1 transition-colors ${
+ isSelected
+ ? "bg-green/10 ring-green"
+ : "bg-sand ring-transparent hover:ring-charcoal/15"
+ }`}
               >
                 <span className="text-xs font-medium text-charcoal">{day}</span>
                 <span className="mt-1 flex flex-col gap-1">
                   {dayBookings.slice(0, 3).map((b) => (
                     <span
                       key={b.id}
-                      className={`truncate rounded px-1.5 py-0.5 text-[11px] leading-tight ${
-                        b.blocking
-                          ? "bg-green/15 text-green"
-                          : "bg-charcoal/5 text-ink-soft line-through"
-                      }`}
+                      className={`truncate px-1.5 py-0.5 text-[11px] leading-tight ${
+ b.blocking
+ ? "bg-green/15 text-green"
+ : "bg-charcoal/5 text-ink-soft line-through"
+ }`}
                     >
                       {b.roomName}
                     </span>
@@ -150,18 +150,18 @@ export function BookingsCalendar({
 
         <div className="mt-4 flex items-center gap-4 text-xs text-ink-soft">
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded bg-green/15 ring-1 ring-green/40" />
+            <span className="h-3 w-3 bg-green/15 ring-1 ring-green/40" />
             Active
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-3 w-3 rounded bg-charcoal/5 ring-1 ring-charcoal/15" />
+            <span className="h-3 w-3 bg-charcoal/5 ring-1 ring-charcoal/15" />
             Cancelled
           </span>
         </div>
       </div>
 
       {/* Day detail + cancel */}
-      <div className="rounded-[2rem] bg-surface p-6 ring-1 ring-charcoal/5">
+      <div className="bg-surface p-6 ring-1 ring-charcoal/5">
         {selectedISO == null ? (
           <p className="text-ink-soft">
             Select a day to see its bookings and cancel any of them.
@@ -178,7 +178,7 @@ export function BookingsCalendar({
                 {selectedBookings.map((b) => (
                   <li
                     key={b.id}
-                    className="rounded-2xl bg-sand p-4 ring-1 ring-charcoal/5"
+                    className="bg-sand p-4 ring-1 ring-charcoal/5"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -191,11 +191,11 @@ export function BookingsCalendar({
                         </p>
                       </div>
                       <span
-                        className={`inline-flex shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
-                          b.blocking
-                            ? "bg-green/10 text-green"
-                            : "bg-sand-deep text-ink-soft line-through"
-                        }`}
+                        className={`inline-flex shrink-0 px-2.5 py-1 text-xs font-medium ${
+ b.blocking
+ ? "bg-green/10 text-green"
+ : "bg-sand-deep text-ink-soft line-through"
+ }`}
                       >
                         {b.status ?? "—"}
                       </span>

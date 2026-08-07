@@ -7,7 +7,7 @@ import { Button } from "./ui";
 import { AlertIcon, SpinnerIcon } from "./icons";
 
 const fieldBase =
-  "mt-1.5 w-full rounded-xl border bg-surface px-4 py-3 text-charcoal transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-green border-charcoal/15 focus:border-green";
+  "mt-1.5 w-full  border bg-surface px-4 py-3 text-charcoal transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-green border-charcoal/15 focus:border-green";
 
 const initialState: LoginState = { status: "idle" };
 
@@ -18,7 +18,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
   return (
     <form
       action={formAction}
-      className="rounded-[2rem] bg-surface p-6 ring-1 ring-charcoal/5 sm:p-9"
+      className="bg-surface p-6 ring-1 ring-charcoal/5 sm:p-9"
       noValidate
     >
       <input type="hidden" name="redirect" value={redirectTo} />
@@ -26,7 +26,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
       {state.status === "error" && (
         <div
           role="alert"
-          className="mb-6 flex items-start gap-3 rounded-2xl bg-rust/10 p-4 text-rust-strong"
+          className="mb-6 flex items-start gap-3 bg-rust/10 p-4 text-rust-strong"
         >
           <AlertIcon className="mt-0.5 h-5 w-5 shrink-0" />
           <p className="text-sm font-medium">{state.message}</p>

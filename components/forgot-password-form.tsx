@@ -6,7 +6,7 @@ import { Button } from "./ui";
 import { AlertIcon, CheckIcon, SpinnerIcon } from "./icons";
 
 const fieldBase =
-  "mt-1.5 w-full rounded-xl border bg-surface px-4 py-3 text-charcoal transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-green border-charcoal/15 focus:border-green";
+  "mt-1.5 w-full  border bg-surface px-4 py-3 text-charcoal transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-green border-charcoal/15 focus:border-green";
 
 const initialState: ForgotState = { status: "idle" };
 
@@ -16,11 +16,11 @@ export function ForgotPasswordForm() {
   if (state.status === "sent") {
     return (
       <div
-        className="rounded-[2rem] bg-surface p-8 ring-1 ring-charcoal/5"
+        className="bg-surface p-8 ring-1 ring-charcoal/5"
         role="status"
         aria-live="polite"
       >
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-green text-white">
+        <span className="flex h-12 w-12 items-center justify-center bg-green text-white">
           <CheckIcon className="h-6 w-6" />
         </span>
         <h2 className="mt-5 font-display text-2xl text-charcoal">Check your inbox</h2>
@@ -36,13 +36,13 @@ export function ForgotPasswordForm() {
   return (
     <form
       action={formAction}
-      className="rounded-[2rem] bg-surface p-6 ring-1 ring-charcoal/5 sm:p-9"
+      className="bg-surface p-6 ring-1 ring-charcoal/5 sm:p-9"
       noValidate
     >
       {state.status === "error" && (
         <div
           role="alert"
-          className="mb-6 flex items-start gap-3 rounded-2xl bg-rust/10 p-4 text-rust-strong"
+          className="mb-6 flex items-start gap-3 bg-rust/10 p-4 text-rust-strong"
         >
           <AlertIcon className="mt-0.5 h-5 w-5 shrink-0" />
           <p className="text-sm font-medium">{state.message}</p>

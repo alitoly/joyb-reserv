@@ -5,7 +5,7 @@ export function Logo({ className = "" }: { className?: string }) {
   return (
     <Link
       href="/"
-      aria-label="JoyB Resort — home"
+      aria-label="JoyB Resort, home"
       className={`group inline-flex items-center ${className}`}
     >
       <Image
@@ -13,7 +13,7 @@ export function Logo({ className = "" }: { className?: string }) {
         alt="JoyB Resort"
         width={180}
         height={84}
-        className="h-20 w-auto object-contain"
+        className="h-14 w-auto object-contain"
         priority
       />
     </Link>

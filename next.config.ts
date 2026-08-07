@@ -4,11 +4,6 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-        pathname: "/**",
-      },
-      {
         // Supabase Storage public objects (room_images)
         protocol: "https",
         hostname: "*.supabase.co",
