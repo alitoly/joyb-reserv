@@ -11,7 +11,7 @@ import {
 } from "@/components/room-booking-form";
 import { Reveal } from "@/components/reveal";
 import { PhotoGrid } from "@/components/photo-grid";
-import { Kicker, Section } from "@/components/ui";
+import { Section } from "@/components/ui";
 import { CheckIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
@@ -99,7 +99,6 @@ export default async function RoomDetailsPage({
 
       <Reveal className="mt-8 grid gap-7 border-t border-charcoal/20 pt-7 lg:grid-cols-[1fr_auto] lg:items-end">
         <div>
-          <Kicker>Room type</Kicker>
           <h1 className="mt-4 text-[clamp(3.8rem,8vw,7.5rem)] leading-[0.86] text-charcoal">{room.name}</h1>
         </div>
         <div className="lg:text-right">
@@ -143,10 +142,6 @@ export default async function RoomDetailsPage({
             <h2 className="font-display text-4xl text-charcoal">
               Your private bathroom
             </h2>
-            <p className="mt-2 max-w-2xl leading-relaxed text-ink-soft">
-              Every room has its own bathroom with a rain shower, hot water, and
-              fresh towels and toiletries waiting for you.
-            </p>
             <PhotoGrid
               photos={BATHROOM_PHOTOS}
               className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3"
@@ -188,8 +183,7 @@ export default async function RoomDetailsPage({
         {/* Right: booking form (sticky on large screens) */}
         <div className="lg:sticky lg:top-24 lg:self-start">
           <Reveal delay={100}>
-            <p className="text-xs font-semibold tracking-[0.22em] text-rust uppercase">Live availability</p>
-            <h2 className="mt-3 mb-5 font-display text-4xl text-charcoal">
+            <h2 className="mb-5 font-display text-4xl text-charcoal">
               Plan your stay
             </h2>
             <RoomBookingForm room={room} defaultGuest={defaultGuest} />

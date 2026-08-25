@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "./logo";
-import { ButtonLink } from "./ui";
 import { createBrowserSupabase, isAuthConfigured } from "@/lib/supabase-auth";
 
 const NAV = [
@@ -20,7 +19,7 @@ const NAV = [
  * transparent header with light type; everywhere else the page starts on sand
  * and the header has to be solid from the first pixel or the links vanish.
  */
-const HERO_PAGES = new Set(["/", "/about", "/gallery"]);
+const HERO_PAGES = new Set(["/", "/rooms", "/about", "/gallery", "/contact"]);
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -64,10 +63,10 @@ export function SiteHeader() {
     >
       {/* Full width, not centred in a container: the mark sits against the
           left edge of the viewport the way the reference does. */}
-      <div className={`flex w-full items-center gap-4 px-5 transition-[padding] duration-500 sm:px-8 ${scrolled ? "py-2" : "py-4"}`}>
+      <div className={`grid w-full grid-cols-[1fr_auto] items-center gap-4 px-5 transition-[padding] duration-500 sm:px-8 md:grid-cols-[1fr_auto_1fr] ${scrolled ? "py-2" : "py-4"}`}>
         <Logo className={overHero ? "text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)]" : "text-charcoal"} />
 
-        <nav aria-label="Primary" className="hidden flex-1 justify-center md:flex">
+        <nav aria-label="Primary" className="hidden justify-center md:flex">
           <ul className="flex items-center gap-1">
             {NAV.map((item) => {
               const active =
@@ -79,7 +78,7 @@ export function SiteHeader() {
                   <Link
                     href={item.href}
                     aria-current={active ? "page" : undefined}
-                    className={`px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-200 ${
+                    className={`editorial-link mx-3 px-0 ${
                       overHero
                         ? active
                           ? "text-white"
@@ -97,10 +96,10 @@ export function SiteHeader() {
           </ul>
         </nav>
 
-        <div className="ml-auto hidden items-center gap-2 md:flex">
+        <div className="ml-auto hidden items-center gap-6 md:flex">
           <Link
             href={authLink.href}
-            className={`px-4 py-2 text-sm font-medium transition-colors duration-200 ${
+            className={`editorial-link ${
               overHero
                 ? "text-white/75 hover:text-white"
                 : "text-charcoal/70 hover:text-charcoal"
@@ -108,9 +107,7 @@ export function SiteHeader() {
           >
             {authLink.label}
           </Link>
-          <ButtonLink href="/book" variant={overHero ? "light" : "primary"}>
-            Book now
-          </ButtonLink>
+          <Link href="/book" className={`editorial-link ${overHero ? "text-white" : "text-charcoal"}`}>Book your stay <span className="ml-2 text-rust">↗</span></Link>
         </div>
 
         <button
@@ -182,14 +179,7 @@ export function SiteHeader() {
               </Link>
             </li>
             <li className="pt-2">
-              <ButtonLink
-                href="/book"
-                variant="primary"
-                className="w-full"
-                onClick={() => setOpen(false)}
-              >
-                Book now
-              </ButtonLink>
+              <Link href="/book" onClick={() => setOpen(false)} className="block border border-charcoal bg-charcoal px-5 py-4 text-center text-[0.62rem] font-bold tracking-[0.2em] text-white uppercase">Book your stay</Link>
             </li>
           </ul>
         </nav>

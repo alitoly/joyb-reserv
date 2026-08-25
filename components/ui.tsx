@@ -4,12 +4,12 @@ import type { ComponentProps, ReactNode } from "react";
 type Variant = "primary" | "gold" | "outline" | "light";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3 text-[0.68rem] font-bold tracking-[0.14em] uppercase transition-all duration-300 cursor-pointer hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0";
+  "inline-flex items-center justify-center gap-3 border px-6 py-3 text-[0.62rem] font-bold tracking-[0.2em] uppercase transition-all duration-300 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60";
 
 const variants: Record<Variant, string> = {
   primary:
     "border-charcoal bg-charcoal text-white hover:border-rust hover:bg-rust focus-visible:outline-rust",
-  gold: "border-gold bg-gold text-charcoal hover:border-gold-strong hover:bg-gold-strong focus-visible:outline-gold-strong",
+  gold: "border-gold bg-gold text-charcoal hover:border-charcoal hover:bg-charcoal hover:text-white focus-visible:outline-gold-strong",
   outline:
     "border border-charcoal/25 bg-transparent text-charcoal hover:border-rust hover:bg-rust hover:text-white focus-visible:outline-rust",
   // For controls sitting on photography, where brand color would disappear.
@@ -89,9 +89,6 @@ export function Section({
 /** Small label that names a section without the overused tracked eyebrow. */
 export function Kicker({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-2 text-sm font-semibold text-rust">
-      <span className="h-px w-6 bg-rust" aria-hidden="true" />
-      {children}
-    </span>
+    <span className="editorial-label text-rust">{children}</span>
   );
 }

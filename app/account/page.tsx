@@ -68,9 +68,6 @@ export default async function AccountPage() {
           <h1 className="mt-3 font-display text-[clamp(3.5rem,7vw,6.5rem)] leading-[0.86] text-charcoal">
             Your stays
           </h1>
-          <p className="mt-2 text-ink-soft">
-            Signed in as {email}. Bookings made with this email appear here.
-          </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {isManagerEmail(email) && (

@@ -1,27 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { MotionProvider } from "@/components/motion-provider";
-
-// Variable font: no `weight` here, so the whole 100-900 axis is available and
-// the display type can actually go bold.
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  weight: "variable",
-  axes: ["opsz", "WONK"],
-  display: "swap",
-});
-
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-jakarta",
-  subsets: ["latin"],
-  weight: "variable",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.joybresort.com"),
@@ -57,7 +39,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#123f4a",
+  themeColor: "#142d28",
   width: "device-width",
   initialScale: 1,
 };
@@ -68,10 +50,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${fraunces.variable} ${jakarta.variable} h-full`}
-    >
+    <html lang="en" className="h-full">
       <body className="min-h-full bg-sand text-ink flex flex-col">
         <a
           href="#main"

@@ -1,32 +1,25 @@
 @import "tailwindcss";
 
-/*
-  JoyB Resort — design tokens.
-  Palette is the committed brand identity (logo colors). Light theme only.
-  Warmth is carried by accents + imagery, not by a muddy background.
-*/
 @theme inline {
-  /* Brand */
-  --color-gold: #ff8a68;
-  --color-gold-strong: #ef6f50;
-  --color-green: #123f4a;
-  --color-green-strong: #0b3039;
-  --color-rust: #218d88;
-  --color-rust-strong: #176d6a;
-  --color-charcoal: #102832;
+  --color-gold: #ee643f;
+  --color-gold-strong: #dc4f2d;
+  --color-green: #142d28;
+  --color-green-strong: #0c211d;
+  --color-rust: #ee643f;
+  --color-rust-strong: #c74729;
+  --color-charcoal: #142d28;
 
-  /* Surfaces & ink */
-  --color-sand: #f3eee8;
-  --color-surface: #fffaf5;
-  --color-sand-deep: #e4d8cd;
-  --color-ink: #142c35;
-  --color-ink-soft: #52666c;
+  --color-sand: #eee7d9;
+  --color-surface: #f7f2e9;
+  --color-sand-deep: #d9cfbd;
+  --color-ink: #142d28;
+  --color-ink-soft: #56635d;
 
   --color-background: var(--color-sand);
   --color-foreground: var(--color-ink);
 
-  --font-display: var(--font-fraunces);
-  --font-sans: var(--font-jakarta);
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-sans: Arial, Helvetica, sans-serif;
 
   /* Semantic z-index scale */
   --z-sticky: 30;
@@ -40,12 +33,13 @@
   color-scheme: light;
 }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: clip; }
 
 body {
+  overflow-x: hidden;
   background: var(--color-sand);
   color: var(--color-ink);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -53,18 +47,18 @@ body {
 h1,
 h2,
 h3 {
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 420;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
   text-wrap: balance;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.055em;
 }
 
 /* The hero wordmark only. Tracking has to come in further still at this size,
    and 800 is where Outfit stops feeling merely bold. */
 .display-xl {
-  font-weight: 430;
-  letter-spacing: -0.055em;
-  line-height: 0.82;
+  font-weight: 400;
+  letter-spacing: -0.075em;
+  line-height: 0.72;
 }
 
 ::selection {
@@ -112,6 +106,43 @@ p {
     linear-gradient(to bottom, rgb(63 111 53 / 0.08) 1px, transparent 1px);
   background-size: 4rem 4rem;
 }
+
+.display-accent {
+  color: var(--color-rust);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.editorial-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.editorial-link {
+  position: relative;
+  width: max-content;
+  padding: 0.85rem 0 0.55rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.editorial-link::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  content: "";
+  background: currentColor;
+  transform: scaleX(0.42);
+  transform-origin: left;
+  transition: transform 350ms ease;
+}
+
+.editorial-link:hover::after { transform: scaleX(1); }
 
 @media (prefers-reduced-motion: no-preference) {
   @keyframes summary-pulse {

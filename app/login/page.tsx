@@ -39,10 +39,6 @@ export default async function LoginPage({
           <h1 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.05] text-charcoal">
             Sign in
           </h1>
-          <p className="mt-4 text-ink-soft">
-            Sign in to see your bookings. Resort staff are taken to the
-            management area.
-          </p>
         </Reveal>
         <Reveal delay={100} className="mt-8">
           <LoginForm redirectTo={redirectTo} />

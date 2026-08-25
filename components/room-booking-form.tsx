@@ -28,7 +28,7 @@ const initialState: BookingState = { status: "idle" };
 function StepHeading({ number, title, hint }: { number: string; title: string; hint?: string }) {
   return (
     <div className="mb-5 flex items-start gap-4">
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-green/35 text-[0.65rem] font-bold tracking-wider text-green">{number}</span>
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-green/35 text-[0.65rem] font-bold tracking-wider text-green">{number}</span>
       <div>
         <h3 className="font-display text-2xl leading-none text-charcoal">{title}</h3>
         {hint && <p className="mt-1 text-xs leading-5 text-ink-soft">{hint}</p>}

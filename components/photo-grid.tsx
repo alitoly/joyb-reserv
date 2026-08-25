@@ -74,6 +74,7 @@ export function PhotoGrid({
         {photos.map((photo, i) => (
           <li
             key={photo.src}
+            data-gallery-tile
             className={`relative overflow-hidden bg-sand-deep ${photo.className ?? tileClassName}`}
           >
             <button
@@ -118,9 +119,7 @@ export function PhotoGrid({
       >
         <div className="relative flex h-full w-full flex-col">
           <div className="flex shrink-0 items-center justify-between px-4 py-4 text-sand sm:px-6">
-            <p className="text-sm tracking-[0.18em] uppercase">
-              {index + 1} / {photos.length}
-            </p>
+            <p className="editorial-label">JoyB gallery</p>
             <button
               type="button"
               onClick={closeViewer}

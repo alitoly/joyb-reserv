@@ -38,7 +38,7 @@ const DETAILS = [
 export default function ContactPage() {
   return (
     <>
-      <PageHero image="/joyb_images/juice-point-courtyard.jpg" alt="JoyB Resort courtyard and fresh juice point" kicker="Contact" title="Let’s plan your stay." description="Questions about rooms, arrival, or your time in Zanzibar? Send us a note and the JoyB team will write back." priority />
+      <PageHero image="/joyb_images/juice-point-courtyard.jpg" alt="JoyB Resort courtyard and fresh juice point" title={<>Let&apos;s plan<br /><em className="display-accent">your stay.</em></>} priority />
 
       <Section className="py-20 sm:py-28" width="wide">
         <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-20">
@@ -47,10 +47,7 @@ export default function ContactPage() {
             <h2 className="mt-3 font-display text-5xl text-charcoal">
               Send a message
             </h2>
-            <p className="mt-3 mb-8 text-sm text-ink-soft">
-              Just the basics, name, email, and your message, are required.
-            </p>
-            <ContactForm />
+            <div className="mt-8"><ContactForm /></div>
           </Reveal>
 
           <Reveal delay={120} className="flex flex-col gap-6">

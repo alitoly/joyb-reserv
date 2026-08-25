@@ -37,11 +37,11 @@ function ImageRail({ images, direction }: { images: readonly GalleryImage[]; dir
       {images.map((photo, index) => (
         <figure
           key={photo.src}
-          className={`group relative shrink-0 overflow-hidden rounded-[2rem] bg-sand-deep ${index % 3 === 1 ? "mt-10 h-[48vw] w-[36vw] sm:h-[28rem] sm:w-[20rem]" : "h-[48vw] w-[62vw] sm:h-[28rem] sm:w-[37rem]"}`}
+          className={`group relative shrink-0 overflow-hidden bg-sand-deep ${index % 3 === 1 ? "mt-14 h-[60vw] w-[42vw] sm:h-[34rem] sm:w-[23rem]" : index % 3 === 2 ? "mt-4 h-[46vw] w-[60vw] sm:h-[27rem] sm:w-[40rem]" : "h-[54vw] w-[70vw] sm:h-[34rem] sm:w-[46rem]"}`}
         >
           <Image src={photo.src} alt={photo.alt} fill sizes="(max-width: 640px) 65vw, 40vw" className="object-cover transition-transform duration-1000 group-hover:scale-[1.025]" />
-          <figcaption className="absolute right-5 bottom-5 left-5 flex items-end justify-between gap-4 text-white">
-            <span className="rounded-full bg-charcoal/65 px-4 py-2 text-[0.62rem] font-bold tracking-[0.13em] uppercase backdrop-blur">{photo.caption}</span>
+          <figcaption className="absolute inset-x-0 bottom-0 flex items-end bg-gradient-to-t from-charcoal/80 to-transparent px-5 pt-16 pb-5 text-white">
+            <span className="font-display text-2xl italic tracking-[-0.03em]">{photo.caption}</span>
           </figcaption>
         </figure>
       ))}

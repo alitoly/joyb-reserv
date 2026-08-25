@@ -27,10 +27,6 @@ export default async function SignupPage() {
           <h1 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.05] text-charcoal">
             Create an account
           </h1>
-          <p className="mt-4 text-ink-soft">
-            Save your details and keep all your JoyB Resort bookings in one
-            place. You can still book without an account.
-          </p>
         </Reveal>
         <Reveal delay={100} className="mt-8">
           <SignupForm />
