@@ -61,17 +61,18 @@ export default async function AccountPage() {
   const bookings = email ? await loadMyBookings(email) : [];
 
   return (
-    <Section className="py-12 sm:py-16" width="wide">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <Section className="py-16 sm:py-24" width="wide">
+      <div className="flex flex-wrap items-end justify-between gap-8 border-b border-charcoal/20 pb-10">
         <div>
-          <h1 className="font-display text-3xl text-charcoal sm:text-4xl">
-            My bookings
+          <p className="text-xs font-semibold tracking-[0.24em] text-rust uppercase">Guest account</p>
+          <h1 className="mt-3 font-display text-[clamp(3.5rem,7vw,6.5rem)] leading-[0.86] text-charcoal">
+            Your stays
           </h1>
           <p className="mt-2 text-ink-soft">
             Signed in as {email}. Bookings made with this email appear here.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {isManagerEmail(email) && (
             <ButtonLink href="/admin/manage" variant="outline">
               Admin area
@@ -89,13 +90,13 @@ export default async function AccountPage() {
       </div>
 
       {!isSupabaseConfigured ? (
-        <div className="mt-10 bg-surface p-8 ring-1 ring-charcoal/5">
+        <div className="mt-10 border border-charcoal/10 bg-surface p-8">
           <p className="text-ink-soft">
             The reservation database isn&apos;t connected yet.
           </p>
         </div>
       ) : bookings.length === 0 ? (
-        <div className="mt-10 bg-surface p-8 ring-1 ring-charcoal/5">
+        <div className="mt-10 border border-charcoal/10 bg-surface p-8">
           <p className="text-ink-soft">
             You don&apos;t have any bookings yet.{" "}
             <Link href="/rooms" className="font-medium text-green hover:underline">
@@ -105,17 +106,17 @@ export default async function AccountPage() {
           </p>
         </div>
       ) : (
-        <ul className="mt-10 grid gap-4 sm:grid-cols-2">
+        <ul className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2">
           {bookings.map((b) => {
             const cancelled = !reservationBlocks(b.status);
             return (
               <li
                 key={b.id}
-                className="bg-surface p-6 ring-1 ring-charcoal/5"
+                className="border-t border-charcoal/20 bg-transparent pt-6"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-display text-xl text-charcoal">
+                    <p className="font-display text-3xl text-charcoal">
                       {b.room_types?.name ?? "Room"}
                     </p>
                     <p className="mt-0.5 font-mono text-xs text-ink-soft">

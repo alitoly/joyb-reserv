@@ -17,10 +17,10 @@ export function RoomCard({
   return (
     <Link
       href={`/rooms/${room.id}`}
-      className="group flex h-full flex-col overflow-hidden bg-surface shadow-[0_1px_3px_rgba(29,32,32,0.06)] ring-1 ring-charcoal/5 transition-shadow duration-300 hover:shadow-[0_18px_40px_-18px_rgba(29,32,32,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green"
+      className="group flex h-full flex-col border-t border-charcoal/20 bg-transparent pt-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green"
       aria-label={`View ${room.name} — $${room.priceUsd} per night`}
     >
-      <div className="relative aspect-[4/3] overflow-hidden">
+      <div className="relative aspect-[4/5] overflow-hidden bg-sand-deep">
         <Image
           src={room.imageUrl}
           alt={room.imageAlt}
@@ -29,13 +29,13 @@ export function RoomCard({
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
         />
-        <span className="absolute left-4 top-4 bg-sand/95 px-3 py-1 text-xs font-semibold text-charcoal">
+        <span className="absolute top-4 left-4 bg-sand/95 px-3 py-1 text-[0.65rem] font-semibold tracking-[0.12em] text-charcoal uppercase">
           {room.totalRooms} {room.totalRooms === 1 ? "room" : "rooms"}
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col p-6">
-        <h3 className="font-display text-2xl text-charcoal">{room.name}</h3>
+      <div className="flex flex-1 flex-col pt-6">
+        <h3 className="font-display text-4xl leading-none text-charcoal">{room.name}</h3>
         <p className="mt-1 text-sm text-ink-soft">
           {room.capacity ? `Sleeps ${room.capacity}` : room.typeName}
         </p>
@@ -44,7 +44,7 @@ export function RoomCard({
           {FACILITY_LABELS.slice(0, 4).map((f) => (
             <li
               key={f}
-              className="bg-sand-deep px-3 py-1 text-xs font-medium text-charcoal/75"
+              className="border border-charcoal/10 px-3 py-1 text-[0.68rem] font-medium text-charcoal/70"
             >
               {f}
             </li>
@@ -57,7 +57,7 @@ export function RoomCard({
             <span className="text-sm text-ink-soft"> / night</span>
           </p>
           {/* Non-interactive affordance — the whole card is the link. */}
-          <span className={buttonClass("primary", "pointer-events-none")}>
+          <span className={buttonClass("outline", "pointer-events-none")}>
             View room
             <span aria-hidden="true">→</span>
           </span>

@@ -10,6 +10,7 @@ import { createBrowserSupabase, isAuthConfigured } from "@/lib/supabase-auth";
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/rooms", label: "Rooms" },
+  { href: "/gallery", label: "Gallery" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
@@ -19,7 +20,7 @@ const NAV = [
  * transparent header with light type; everywhere else the page starts on sand
  * and the header has to be solid from the first pixel or the links vanish.
  */
-const HERO_PAGES = new Set(["/", "/about"]);
+const HERO_PAGES = new Set(["/", "/about", "/gallery"]);
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -55,7 +56,7 @@ export function SiteHeader() {
 
   return (
     <header
-      className={`sticky top-0 z-[var(--z-header)] transition-colors duration-300 ${
+      className={`sticky top-0 z-[var(--z-header)] transition-all duration-500 ${
         overHero
           ? "bg-transparent"
           : "border-b border-charcoal/10 bg-sand/90 backdrop-blur"
@@ -63,8 +64,8 @@ export function SiteHeader() {
     >
       {/* Full width, not centred in a container: the mark sits against the
           left edge of the viewport the way the reference does. */}
-      <div className="flex w-full items-center gap-4 px-5 py-3 sm:px-8">
-        <Logo className={overHero ? "drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)]" : ""} />
+      <div className={`flex w-full items-center gap-4 px-5 transition-[padding] duration-500 sm:px-8 ${scrolled ? "py-2" : "py-4"}`}>
+        <Logo className={overHero ? "text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)]" : "text-charcoal"} />
 
         <nav aria-label="Primary" className="hidden flex-1 justify-center md:flex">
           <ul className="flex items-center gap-1">

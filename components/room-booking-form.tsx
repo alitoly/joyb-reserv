@@ -25,6 +25,18 @@ const MAX_GUESTS_FALLBACK = 6;
 
 const initialState: BookingState = { status: "idle" };
 
+function StepHeading({ number, title, hint }: { number: string; title: string; hint?: string }) {
+  return (
+    <div className="mb-5 flex items-start gap-4">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-green/35 text-[0.65rem] font-bold tracking-wider text-green">{number}</span>
+      <div>
+        <h3 className="font-display text-2xl leading-none text-charcoal">{title}</h3>
+        {hint && <p className="mt-1 text-xs leading-5 text-ink-soft">{hint}</p>}
+      </div>
+    </div>
+  );
+}
+
 /**
  * Booking form embedded on the room-type details page. The type is fixed (no
  * picker), so the flow is just: dates → guests → your details. The server
@@ -194,7 +206,7 @@ export function RoomBookingForm({
   return (
     <form
       action={formAction}
-      className="bg-surface p-6 ring-1 ring-charcoal/5 sm:p-9"
+      className="border border-charcoal/10 bg-surface p-5 shadow-[0_30px_80px_-55px_rgba(29,32,32,0.55)] sm:p-8"
       noValidate
     >
       {/* room.id is a room-TYPE id — the server assigns a specific physical room. */}
@@ -211,10 +223,12 @@ export function RoomBookingForm({
         </div>
       )}
 
-      <fieldset className="grid gap-7" disabled={pending}>
+      <fieldset disabled={pending}>
         <legend className="sr-only">Booking details for {room.name}</legend>
 
         {/* Dates */}
+        <section className="border-t border-charcoal/12 py-7 first:border-t-0 first:pt-0">
+        <StepHeading number="01" title="Choose your dates" hint="Availability updates automatically." />
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <label
@@ -267,9 +281,12 @@ export function RoomBookingForm({
         </div>
 
         {/* Availability feedback for this room type */}
-        <AvailabilityBanner avail={avail} />
+        <div className="mt-5"><AvailabilityBanner avail={avail} /></div>
+        </section>
 
         {/* Guests */}
+        <section className="border-t border-charcoal/12 py-7">
+        <StepHeading number="02" title="Who is staying?" hint={`This room sleeps up to ${maxGuests}.`} />
         <div className="grid gap-5 sm:grid-cols-2 sm:max-w-[24rem]">
           <div>
             <label htmlFor="adults" className="text-sm font-medium text-charcoal">
@@ -322,8 +339,11 @@ export function RoomBookingForm({
             )}
           </div>
         </div>
+        </section>
 
         {/* Guest details */}
+        <section className="border-t border-charcoal/12 pt-7">
+        <StepHeading number="03" title="Your details" hint="We use these details to confirm your request." />
         <div className="grid gap-5">
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
@@ -418,15 +438,17 @@ export function RoomBookingForm({
             />
           </div>
         </div>
+        </section>
       </fieldset>
 
       {/* Summary + submit */}
-      <div className="mt-8 bg-sand p-5">
+      <div className="mt-8 border-t border-green/20 bg-sand p-5 shadow-[0_-16px_35px_-30px_rgba(29,32,32,0.7)] sm:sticky sm:bottom-0">
+        <StepHeading number="04" title="Review your stay" />
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div aria-live="polite" className="text-ink-soft">
             <p className="font-medium text-charcoal">{room.name}</p>
             {datesValid && price ? (
-              <p className="mt-0.5 text-sm">
+              <p key={price.total} className="summary-pulse mt-0.5 text-sm">
                 {nights} {nights === 1 ? "night" : "nights"} ·{" "}
                 <span className="text-ink-soft">
                   ${room.priceUsd} × {nights} = ${price.subtotal} + VAT $
@@ -447,7 +469,7 @@ export function RoomBookingForm({
           <Button
             type="submit"
             variant="primary"
-            className="px-8"
+            className="hidden px-8 sm:inline-flex"
             disabled={!canSubmit}
           >
             {pending ? (
@@ -463,6 +485,18 @@ export function RoomBookingForm({
           No payment needed now — we&apos;ll confirm your booking by email.
         </p>
       </div>
+
+      {datesValid && price && (
+        <div className="fixed right-0 bottom-0 left-0 z-30 flex items-center justify-between gap-4 border-t border-charcoal/10 bg-sand/95 px-4 py-3 shadow-[0_-12px_30px_-20px_rgba(29,32,32,0.7)] backdrop-blur sm:hidden">
+          <div aria-live="polite">
+            <p className="text-[0.65rem] font-semibold tracking-[0.14em] text-ink-soft uppercase">{nights} {nights === 1 ? "night" : "nights"}</p>
+            <p className="font-display text-2xl leading-none text-charcoal">${price.total} <span className="font-sans text-[0.65rem] text-ink-soft">est.</span></p>
+          </div>
+          <Button type="submit" variant="primary" disabled={!canSubmit}>
+            {pending ? <><SpinnerIcon className="h-5 w-5" /> Reserving…</> : "Request booking"}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

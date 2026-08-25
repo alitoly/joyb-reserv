@@ -6,6 +6,7 @@ import Image from "next/image";
 export interface GalleryPhoto {
   src: string;
   alt: string;
+  caption?: string;
   /** Extra grid classes for this tile (column span, aspect override). */
   className?: string;
 }
@@ -90,6 +91,11 @@ export function PhotoGrid({
                 className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
               />
             </button>
+            {photo.caption && (
+              <p className="pointer-events-none absolute right-0 bottom-0 left-0 z-10 bg-gradient-to-t from-charcoal/85 to-transparent px-4 pt-12 pb-4 text-xs font-medium tracking-wide text-white">
+                {photo.caption}
+              </p>
+            )}
           </li>
         ))}
       </ul>
@@ -150,7 +156,7 @@ export function PhotoGrid({
               <span aria-hidden="true">←</span>
             </button>
             <p className="min-w-0 flex-1 text-center text-sm leading-relaxed text-sand/80">
-              {current?.alt}
+              {current?.caption ?? current?.alt}
             </p>
             <button
               type="button"

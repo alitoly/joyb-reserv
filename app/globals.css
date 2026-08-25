@@ -7,26 +7,26 @@
 */
 @theme inline {
   /* Brand */
-  --color-gold: #f2a900;
-  --color-gold-strong: #d99400;
-  --color-green: #3f6f35;
-  --color-green-strong: #335a2b;
-  --color-rust: #b13a1f;
-  --color-rust-strong: #94301a;
-  --color-charcoal: #1d2020;
+  --color-gold: #ff8a68;
+  --color-gold-strong: #ef6f50;
+  --color-green: #123f4a;
+  --color-green-strong: #0b3039;
+  --color-rust: #218d88;
+  --color-rust-strong: #176d6a;
+  --color-charcoal: #102832;
 
   /* Surfaces & ink */
-  --color-sand: #f8f5ef; /* page background */
-  --color-surface: #ffffff; /* cards, panels */
-  --color-sand-deep: #efe9dd; /* alt sections, hairlines */
-  --color-ink: #1d2020; /* body text — 4.5:1+ on sand */
-  --color-ink-soft: #4a4f48; /* muted text, still ≥4.5:1 on sand */
+  --color-sand: #f3eee8;
+  --color-surface: #fffaf5;
+  --color-sand-deep: #e4d8cd;
+  --color-ink: #142c35;
+  --color-ink-soft: #52666c;
 
   --color-background: var(--color-sand);
   --color-foreground: var(--color-ink);
 
-  --font-display: var(--font-outfit);
-  --font-sans: var(--font-mulish);
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-jakarta);
 
   /* Semantic z-index scale */
   --z-sticky: 30;
@@ -40,9 +40,7 @@
   color-scheme: light;
 }
 
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 body {
   background: var(--color-sand);
@@ -52,24 +50,31 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Headings lean on the display family with balanced wrapping. Outfit is a
-   geometric sans, so it wants real weight and tighter tracking than the serif
-   this replaced: optical spacing opens up fast at display sizes. */
 h1,
 h2,
 h3 {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 700;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 420;
   text-wrap: balance;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.035em;
 }
 
 /* The hero wordmark only. Tracking has to come in further still at this size,
    and 800 is where Outfit stops feeling merely bold. */
 .display-xl {
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 0.92;
+  font-weight: 430;
+  letter-spacing: -0.055em;
+  line-height: 0.82;
+}
+
+::selection {
+  background: var(--color-rust);
+  color: white;
+}
+
+.editorial-rule {
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-gold) 75%, white), transparent);
+  height: 1px;
 }
 
 p {
@@ -82,25 +87,38 @@ p {
   outline-offset: 2px;
 }
 
-/* Scroll-reveal: content is visible by default, motion only enhances it */
-.reveal {
-  opacity: 1;
-  transform: none;
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.image-veil::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 55%, rgb(29 32 32 / 0.55));
+}
+
+.editorial-grid {
+  background-image:
+    linear-gradient(to right, rgb(63 111 53 / 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(63 111 53 / 0.08) 1px, transparent 1px);
+  background-size: 4rem 4rem;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .reveal {
-    opacity: 0;
-    transform: translateY(24px);
-    transition:
-      opacity 0.7s var(--ease-out-quint),
-      transform 0.7s var(--ease-out-quint);
-    transition-delay: var(--reveal-delay, 0ms);
+  @keyframes summary-pulse {
+    from { opacity: 0.45; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
   }
-  .reveal[data-visible="true"] {
-    opacity: 1;
-    transform: none;
-  }
+  .summary-pulse { animation: summary-pulse 0.45s var(--ease-out-quint); }
 }
 
 /* Hero photograph settles into its frame once on load, then stays put. One

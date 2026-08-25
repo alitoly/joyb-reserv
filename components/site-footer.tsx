@@ -6,7 +6,7 @@ export function SiteFooter() {
     <footer className="mt-24 border-t border-charcoal/10 bg-charcoal text-sand">
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1.5fr_1fr_1fr]">
         <div>
-          <div className="[&_span]:text-sand [&_.text-green]:text-gold">
+          <div className="text-sand">
             <Logo />
           </div>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-sand/70">
@@ -20,6 +20,7 @@ export function SiteFooter() {
           <ul className="mt-4 space-y-2 text-sm">
             {[
               { href: "/rooms", label: "Rooms & rates" },
+              { href: "/gallery", label: "Gallery" },
               { href: "/book", label: "Book your stay" },
               { href: "/about", label: "Our story" },
               { href: "/contact", label: "Contact us" },
