@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ForgotPasswordForm } from "@/components/forgot-password-form";
 import { Reveal } from "@/components/reveal";
-import { Kicker, Section } from "@/components/ui";
+import { Kicker } from "@/components/ui";
+import { AuthShell } from "@/components/auth-shell";
 
 export const metadata: Metadata = {
   title: "Forgot password",
@@ -11,8 +12,7 @@ export const metadata: Metadata = {
 
 export default function ForgotPasswordPage() {
   return (
-    <Section className="py-16 sm:py-24" width="narrow">
-      <div className="mx-auto max-w-md">
+    <AuthShell>
         <Reveal>
           <Kicker>Account</Kicker>
           <h1 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.05] text-charcoal">
@@ -33,7 +33,6 @@ export default function ForgotPasswordPage() {
             </Link>
           </p>
         </Reveal>
-      </div>
-    </Section>
+    </AuthShell>
   );
 }

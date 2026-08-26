@@ -1,21 +1,14 @@
 import Link from "next/link";
-import Image from "next/image";
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
     <Link
       href="/"
       aria-label="JoyB Resort, home"
-      className={`group inline-flex items-center ${className}`}
+      className={`group flex w-max flex-col text-current ${className}`}
     >
-      <Image
-        src="/logo.png"
-        alt="JoyB Resort"
-        width={180}
-        height={84}
-        className="h-14 w-auto object-contain"
-        priority
-      />
+      <span className="font-display text-[1.75rem] leading-[0.78] tracking-[-0.055em]">JOYB</span>
+      <span className="mt-2 text-[0.46rem] font-bold tracking-[0.42em] uppercase">Zanzibar</span>
     </Link>
   );
 }

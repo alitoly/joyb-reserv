@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { createBrowserSupabase, isAuthConfigured } from "@/lib/supabase-auth";
 import { Button } from "@/components/ui";
 import { AlertIcon, CheckIcon, SpinnerIcon } from "@/components/icons";
-import { Kicker, Section } from "@/components/ui";
+import { Kicker } from "@/components/ui";
 import { Reveal } from "@/components/reveal";
+import { AuthShell } from "@/components/auth-shell";
 
 const fieldBase =
   "mt-1.5 w-full  border bg-surface px-4 py-3 text-charcoal transition-colors focus:outline-none focus-visible:outline-2 focus-visible:outline-green border-charcoal/15 focus:border-green";
@@ -69,8 +70,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <Section className="py-16 sm:py-24" width="narrow">
-      <div className="mx-auto max-w-md">
+    <AuthShell>
         <Reveal>
           <Kicker>Account</Kicker>
           <h1 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.05] text-charcoal">
@@ -103,7 +103,7 @@ export default function ResetPasswordPage() {
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="bg-surface p-6 ring-1 ring-charcoal/5 sm:p-9"
+              className="border border-charcoal/12 bg-surface p-6 shadow-[0_24px_60px_-45px_rgba(29,32,32,0.5)] sm:p-9"
               noValidate
             >
               {error && (
@@ -168,7 +168,6 @@ export default function ResetPasswordPage() {
             </form>
           )}
         </Reveal>
-      </div>
-    </Section>
+    </AuthShell>
   );
 }

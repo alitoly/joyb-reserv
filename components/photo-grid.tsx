@@ -6,6 +6,7 @@ import Image from "next/image";
 export interface GalleryPhoto {
   src: string;
   alt: string;
+  caption?: string;
   /** Extra grid classes for this tile (column span, aspect override). */
   className?: string;
 }
@@ -73,6 +74,7 @@ export function PhotoGrid({
         {photos.map((photo, i) => (
           <li
             key={photo.src}
+            data-gallery-tile
             className={`relative overflow-hidden bg-sand-deep ${photo.className ?? tileClassName}`}
           >
             <button
@@ -90,6 +92,11 @@ export function PhotoGrid({
                 className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
               />
             </button>
+            {photo.caption && (
+              <p className="pointer-events-none absolute right-0 bottom-0 left-0 z-10 bg-gradient-to-t from-charcoal/85 to-transparent px-4 pt-12 pb-4 text-xs font-medium tracking-wide text-white">
+                {photo.caption}
+              </p>
+            )}
           </li>
         ))}
       </ul>
@@ -112,9 +119,7 @@ export function PhotoGrid({
       >
         <div className="relative flex h-full w-full flex-col">
           <div className="flex shrink-0 items-center justify-between px-4 py-4 text-sand sm:px-6">
-            <p className="text-sm tracking-[0.18em] uppercase">
-              {index + 1} / {photos.length}
-            </p>
+            <p className="editorial-label">JoyB gallery</p>
             <button
               type="button"
               onClick={closeViewer}
@@ -150,7 +155,7 @@ export function PhotoGrid({
               <span aria-hidden="true">←</span>
             </button>
             <p className="min-w-0 flex-1 text-center text-sm leading-relaxed text-sand/80">
-              {current?.alt}
+              {current?.caption ?? current?.alt}
             </p>
             <button
               type="button"

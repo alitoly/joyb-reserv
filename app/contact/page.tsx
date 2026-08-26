@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
 import { Reveal } from "@/components/reveal";
-import { Kicker, Section } from "@/components/ui";
+import { Section } from "@/components/ui";
+import { PageHero } from "@/components/page-hero";
 import { MapPinIcon, PhoneIcon, MailIcon } from "@/components/icons";
 
 export const metadata: Metadata = {
@@ -37,29 +38,16 @@ const DETAILS = [
 export default function ContactPage() {
   return (
     <>
-      <Section className="pt-16 pb-8 sm:pt-24">
-        <Reveal className="max-w-3xl">
-          <Kicker>Contact</Kicker>
-          <h1 className="mt-4 text-[clamp(2.5rem,5vw,4rem)] leading-[1.05] text-charcoal">
-            We&apos;d love to hear from you
-          </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft">
-            Planning a stay, arranging an airport pickup, or just curious about
-            the area? Send us a note and a real person will write back.
-          </p>
-        </Reveal>
-      </Section>
+      <PageHero image="/joyb_images/juice-point-courtyard.jpg" alt="JoyB Resort courtyard and fresh juice point" title={<>Let&apos;s plan<br /><em className="display-accent">your stay.</em></>} priority />
 
-      <Section className="pb-16">
-        <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-14">
-          <Reveal className="bg-surface p-6 ring-1 ring-charcoal/5 sm:p-9">
-            <h2 className="font-display text-2xl text-charcoal">
+      <Section className="py-20 sm:py-28" width="wide">
+        <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-20">
+          <Reveal className="border-t border-charcoal/20 pt-8">
+            <p className="text-xs font-semibold tracking-[0.22em] text-rust uppercase">Write to us</p>
+            <h2 className="mt-3 font-display text-5xl text-charcoal">
               Send a message
             </h2>
-            <p className="mt-1 mb-6 text-sm text-ink-soft">
-              Just the basics, name, email, and your message, are required.
-            </p>
-            <ContactForm />
+            <div className="mt-8"><ContactForm /></div>
           </Reveal>
 
           <Reveal delay={120} className="flex flex-col gap-6">
@@ -67,7 +55,7 @@ export default function ContactPage() {
               {DETAILS.map((d) => (
                 <li
                   key={d.label}
-                  className="flex items-start gap-4 bg-surface p-5 ring-1 ring-charcoal/5"
+                  className="flex items-start gap-4 border-t border-charcoal/15 py-5"
                 >
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center bg-green/10 text-green">
                     <d.icon className="h-5 w-5" />
@@ -98,7 +86,7 @@ export default function ContactPage() {
             </ul>
 
             {/* Google Maps embed */}
-            <div className="overflow-hidden ring-1 ring-charcoal/5">
+            <div className="overflow-hidden border border-charcoal/10">
               <iframe
                 src="https://maps.google.com/maps?q=-6.2078099,39.2153358&output=embed&z=16"
                 width="100%"

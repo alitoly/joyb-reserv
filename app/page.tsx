@@ -1,218 +1,86 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Reveal } from "@/components/reveal";
-import { PhotoGrid } from "@/components/photo-grid";
+import { ScrollLine } from "@/components/scroll-line";
 import { Kicker, Section } from "@/components/ui";
-import { PalmIcon, BedIcon } from "@/components/icons";
-
+import { GALLERY_IMAGES } from "@/lib/gallery";
+import { ScrollImageShowcase } from "@/components/scroll-image-showcase";
 
 export const revalidate = 300;
 
-const heroImg = "/joyb_images/garden-lawn.jpg";
+const EXPERIENCES = [
+  { src: "/joyb_images/pool-loungers.jpg", label: "The pool", title: "Long afternoons beside the water", frame: "lg:mt-20" },
+  { src: "/joyb_images/restaurant-night.jpg", label: "Dining", title: "Warm light, open air", frame: "" },
+  { src: "/joyb_images/deluxe-1.jpg", label: "The rooms", title: "A quiet place to return to", frame: "lg:mt-36" },
+] as const;
 
-/**
- * What guests actually get, in the order it matters. Sizes and offsets differ
- * on purpose so this reads as a composition, not three equal cards.
- */
-const FACILITIES = [
-  {
-    src: "/joyb_images/pool-loungers.jpg",
-    alt: "Loungers with rolled towels along the pool, waterfall running at the far end",
-    title: "The pool",
-    body: "A full length pool in the middle of the garden, with loungers, towels, and a waterfall at the shallow end.",
-    className: "md:col-span-7",
-    ratio: "sm:aspect-[4/3]",
-  },
-  {
-    src: "/joyb_images/restaurant-night.jpg",
-    alt: "The open air restaurant at night, wicker pendant lights over wooden tables",
-    title: "Restaurant and juice point",
-    body: "Breakfast under the thatch, Swahili cooking through the day, and a juice bar pressing whatever is ripe that morning.",
-    className: "md:col-span-5 md:mt-16",
-    ratio: "sm:aspect-[4/5]",
-  },
-  {
-    src: "/joyb_images/garden-lawn.jpg",
-    alt: "Lawn and young palms running from the room doors down to the poolside",
-    title: "The garden",
-    body: "Mango trees, palms, and shaded corners with swing seats. The lawn runs right up to the room doors.",
-    className: "md:col-span-8 md:col-start-4",
-    ratio: "sm:aspect-[16/9]",
-  },
-];
-
-/**
- * Six photographs at three different scales rather than a uniform tile grid.
- * The first runs the full width of the container, then the set alternates
- * between a tall frame and a wide one so the eye moves at a changing pace.
- * Spans total twelve on every row, so nothing is ever orphaned.
- */
-const GALLERY = [
-  {
-    src: "/joyb_images/night-pool.jpg",
-    alt: "The pool lit turquoise and violet after dark, warm light in the room doorways",
-    className: "col-span-2 aspect-[4/3] sm:col-span-12 sm:aspect-[21/9]",
-  },
-  {
-    src: "/joyb_images/juice-point.jpg",
-    alt: "The Fresh Juice Point counter painted with fruit, sun loungers in front",
-    className: "col-span-2 aspect-[4/3] sm:col-span-5 sm:aspect-[4/5]",
-  },
-  {
-    src: "/joyb_images/poolside-rooms.jpg",
-    alt: "Coral stone room fronts with red shutters opening onto the pool terrace",
-    className: "col-span-2 aspect-[4/3] sm:col-span-7 sm:aspect-auto",
-  },
-  {
-    src: "/joyb_images/restaurant-pergola.jpg",
-    alt: "Wooden tables under the restaurant pergola, shaded by mango trees",
-    className: "col-span-2 aspect-[4/3] sm:col-span-7 sm:aspect-auto",
-  },
-  {
-    src: "/joyb_images/dhow-courtyard.jpg",
-    alt: "A carved wooden dhow resting on a painted wave mural in the courtyard",
-    className: "col-span-2 aspect-[4/3] sm:col-span-5 sm:aspect-[4/5]",
-  },
-  {
-    src: "/joyb_images/safari-mural.jpg",
-    alt: "Hand painted safari mural behind a coral rock water feature",
-    className: "col-span-2 aspect-[4/3] sm:col-span-12 sm:aspect-[21/9]",
-  },
-];
-
-const FEATURES = [
-  {
-    icon: PalmIcon,
-    title: "A garden, a pool, and shade",
-    body: "Lawns, mango trees, and a full length pool at the centre of it. JoyB is a calm, green pocket in the heart of the island, minutes from the airport.",
-  },
-  {
-    icon: BedIcon,
-    title: "Rooms made for rest",
-    body: "Every room has its own bathroom with a rain shower, plus AC or fan, a fridge, a kettle, and linen kept crisp. Designed for calm, not clutter.",
-  },
-];
-
-export default async function HomePage() {
+export default function HomePage() {
   return (
     <>
-      {/* Hero: the header sits on top of this, so the section starts at the
-          very top of the page and the scrim has to carry the nav too. */}
-      <section className="relative isolate -mt-20 flex min-h-[100dvh] items-end justify-center overflow-hidden">
-        <Image
-          src={heroImg}
-          alt="The lawn at JoyB Resort, young palms running down to the poolside under old mango trees"
-          fill
-          priority
-          sizes="100vw"
-          className="animate-settle -z-10 object-cover object-center"
-        />
-        {/*
-          Measured, not guessed. This frame runs 50 to 66 percent blown
-          highlights across its top fifth (pale sky, white building) and close
-          to zero across its bottom quarter (lawn in shade). White type in the
-          middle of the frame measured 1.5:1 against those highlights, and no
-          uniform scrim fixes that without flattening the whole picture. So the
-          type sits low over the grass, and the scrim is weighted to match:
-          light across the top where the photograph is worth seeing, heavy
-          across the bottom where the words are.
-        */}
-        <div className="absolute inset-0 -z-10 bg-charcoal/12" aria-hidden="true" />
-        <div
-          className="absolute inset-0 -z-10 bg-gradient-to-b from-charcoal/35 from-0% via-charcoal/5 via-35% to-charcoal/90 to-100%"
-          aria-hidden="true"
-        />
-
-        {/* No button here on purpose. The header's own Book now sits directly
-            above it in high contrast, and dropping the duplicate lets the type
-            fall into the part of the frame that can actually carry it. */}
-        <div className="w-full px-5 pt-28 pb-16 text-center sm:px-8 sm:pb-20">
-          <h1 className="display-xl font-display text-[clamp(3rem,10.5vw,8rem)] text-white">
-            JoyB Resort
+      <section className="relative isolate -mt-24 flex min-h-[100svh] items-end overflow-hidden bg-charcoal text-white">
+        <Image src="/joyb_images/garden-lawn.jpg" alt="The lawn at JoyB Resort beneath old mango trees and young palms" fill priority sizes="100vw" className="animate-settle -z-10 object-cover object-[52%_center]" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-charcoal/35 via-transparent to-charcoal/70" />
+        <div className="w-full px-5 pb-10 sm:px-8 sm:pb-14">
+          <p className="editorial-label mb-8 text-white/90">Zanzibar · Tanzania</p>
+          <h1 className="display-xl max-w-[95rem] text-[clamp(5.2rem,16.5vw,16rem)] text-white">
+            Stay close<br /><em className="display-accent ml-[12vw]">to nature.</em>
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-sm tracking-[0.2em] text-white/85 uppercase sm:text-base">
-            A garden in the heart of Zanzibar
-          </p>
+        </div>
+        <div className="absolute right-5 bottom-12 hidden items-center gap-4 editorial-label text-white md:flex [writing-mode:vertical-rl]">
+          Scroll to explore <span className="h-20 w-px bg-white/60" />
         </div>
       </section>
 
-      {/* Features */}
-      <Section className="py-20 sm:py-28">
-        <Reveal className="max-w-2xl">
-          <Kicker>Why JoyB</Kicker>
-          <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-tight text-charcoal">
-            Small resort, generous in every way that matters
-          </h2>
-        </Reveal>
-
-        <div className="mt-14 grid gap-x-10 gap-y-12 md:grid-cols-2">
-          {FEATURES.map((f, i) => (
-            <Reveal as="div" key={f.title} delay={i * 90}>
-              <div className="flex h-12 w-12 items-center justify-center bg-green/10 text-green">
-                <f.icon className="h-6 w-6" />
-              </div>
-              <h3 className="mt-5 font-display text-2xl text-charcoal">
-                {f.title}
-              </h3>
-              <p className="mt-3 leading-relaxed text-ink-soft">{f.body}</p>
-            </Reveal>
-          ))}
+      <Section id="discover" className="relative min-h-[88svh] py-20 sm:py-32" width="wide">
+        <div className="absolute top-0 left-8 hidden h-full md:block"><ScrollLine /></div>
+        <div className="flex justify-between border-t border-charcoal/45 pt-4 editorial-label"><span>JoyB Zanzibar</span><span>A garden stay</span></div>
+        <div className="grid gap-12 pt-24 md:grid-cols-[0.7fr_2fr] md:gap-20 md:pt-36">
+          <Reveal><Kicker>Why JoyB</Kicker></Reveal>
+          <Reveal delay={100}><h2 className="max-w-5xl text-[clamp(3.6rem,7vw,7.2rem)] leading-[0.93] text-charcoal">A small resort, generous in every way that matters.</h2></Reveal>
         </div>
       </Section>
 
-      {/* What's here */}
-      <Section className="pb-20 sm:pb-28">
-        <Reveal className="max-w-2xl">
-          <h2 className="text-[clamp(2rem,4vw,3rem)] leading-tight text-charcoal">
-            More than a place to sleep
-          </h2>
-          <p className="mt-4 leading-relaxed text-ink-soft">
-            Most of the day at JoyB happens outside your room. Here is what you
-            walk out into.
-          </p>
-        </Reveal>
-
-        <div className="mt-14 grid gap-x-8 gap-y-14 md:grid-cols-12">
-          {FACILITIES.map((f, i) => (
-            <Reveal as="div" key={f.src} delay={i * 90} className={f.className}>
-              <div
-                className={`relative aspect-[4/3] overflow-hidden bg-sand-deep ${f.ratio}`}
-              >
-                <Image
-                  src={f.src}
-                  alt={f.alt}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 55vw"
-                  className="object-cover"
-                />
-              </div>
-              <h3 className="mt-6 font-display text-2xl text-charcoal">
-                {f.title}
-              </h3>
-              <p className="mt-2 max-w-md leading-relaxed text-ink-soft">
-                {f.body}
-              </p>
-            </Reveal>
-          ))}
+      <section className="bg-charcoal py-20 text-sand sm:py-28">
+        <div className="mx-auto max-w-[100rem] px-5 sm:px-8">
+          <div className="flex items-end justify-between border-t border-sand/35 pt-4">
+            <Kicker>Life at JoyB</Kicker>
+            <Link href="/gallery" className="editorial-link text-sand">Open gallery <span className="ml-2 text-rust">↗</span></Link>
+          </div>
+          <Reveal><h2 className="mt-20 max-w-5xl text-[clamp(4rem,8vw,8rem)] leading-[0.82] text-sand">Let the day find <em className="display-accent">its own pace.</em></h2></Reveal>
+          <div className="mt-20 grid items-start gap-12 lg:grid-cols-[0.9fr_1.25fr_0.8fr] lg:gap-7">
+            {EXPERIENCES.map((item, index) => (
+              <Reveal key={item.title} delay={index * 90}>
+                <article className={item.frame}>
+                  <div className={`group relative overflow-hidden bg-green-strong ${index === 1 ? "aspect-[4/5]" : "aspect-[3/4]"}`}>
+                    <Image src={item.src} alt={item.title} fill sizes="(max-width: 1024px) 100vw, 36vw" className="object-cover transition-transform duration-1000 group-hover:scale-[1.035]" />
+                  </div>
+                  <p className="mt-5 editorial-label text-rust">0{index + 1} · {item.label}</p>
+                  <h3 className="mt-3 max-w-sm text-[clamp(2rem,3.2vw,3.3rem)] leading-[0.98] text-sand">{item.title}</h3>
+                </article>
+              </Reveal>
+            ))}
+          </div>
         </div>
-      </Section>
+      </section>
 
-      {/* Gallery */}
-      <Section className="pb-24 sm:pb-36">
-        <Reveal className="mb-12 max-w-3xl sm:mb-16">
-          <Kicker>The resort</Kicker>
-          <h2 className="mt-5 text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.02] text-charcoal">
-            A calm place to call home
-          </h2>
-        </Reveal>
+      <section className="overflow-hidden bg-surface py-20 sm:py-28">
+        <div className="mx-auto max-w-[100rem] px-5 sm:px-8">
+          <Reveal className="flex flex-col gap-8 border-t border-charcoal/45 pt-4 sm:flex-row sm:items-end sm:justify-between">
+            <div><Kicker>Seen at JoyB</Kicker><h2 className="mt-16 text-[clamp(4rem,8vw,8rem)] leading-[0.82] text-charcoal">The island mood,<br /><em className="display-accent">moving with you.</em></h2></div>
+            <Link href="/gallery" className="editorial-link text-charcoal">Open gallery <span className="ml-2 text-rust">↗</span></Link>
+          </Reveal>
+        </div>
+        <div className="mt-16"><ScrollImageShowcase images={GALLERY_IMAGES.slice(0, 16)} /></div>
+      </section>
 
-        <Reveal>
-          <PhotoGrid
-            photos={GALLERY}
-            className="grid grid-cols-2 gap-3 sm:grid-cols-12 sm:gap-4"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 60vw, 55vw"
-          />
+      <section className="grid min-h-[86svh] bg-sand lg:grid-cols-[1.55fr_1fr]">
+        <Reveal className="relative min-h-[68svh] overflow-hidden"><Image src="/joyb_images/resort-twilight.jpg" alt="JoyB Resort pool and garden at twilight" fill sizes="(max-width: 1024px) 100vw, 62vw" className="object-cover" /></Reveal>
+        <Reveal className="flex flex-col justify-center px-6 py-20 sm:px-12 lg:px-[7vw]">
+          <Kicker>A slower rhythm</Kicker>
+          <h2 className="mt-16 text-[clamp(4.2rem,7vw,7rem)] leading-[0.82] text-charcoal">Come home<br />to the <em className="display-accent">garden.</em></h2>
+          <Link href="/rooms" className="editorial-link mt-14 text-charcoal">Find your room <span className="ml-2 text-rust">↗</span></Link>
         </Reveal>
-      </Section>
+      </section>
     </>
   );
 }

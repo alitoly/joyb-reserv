@@ -5,7 +5,8 @@ import { getSessionUser } from "@/lib/supabase-auth-server";
 import { postLoginPath } from "@/lib/supabase-auth";
 import { SignupForm } from "@/components/signup-form";
 import { Reveal } from "@/components/reveal";
-import { Kicker, Section } from "@/components/ui";
+import { Kicker } from "@/components/ui";
+import { AuthShell } from "@/components/auth-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -20,17 +21,12 @@ export default async function SignupPage() {
   if (user) redirect(postLoginPath(user));
 
   return (
-    <Section className="py-16 sm:py-24" width="narrow">
-      <div className="mx-auto max-w-md">
+    <AuthShell>
         <Reveal>
           <Kicker>Guests</Kicker>
           <h1 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.05] text-charcoal">
             Create an account
           </h1>
-          <p className="mt-4 text-ink-soft">
-            Save your details and keep all your JoyB Resort bookings in one
-            place. You can still book without an account.
-          </p>
         </Reveal>
         <Reveal delay={100} className="mt-8">
           <SignupForm />
@@ -46,7 +42,6 @@ export default async function SignupPage() {
             </Link>
           </p>
         </Reveal>
-      </div>
-    </Section>
+    </AuthShell>
   );
 }

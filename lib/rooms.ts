@@ -168,6 +168,18 @@ const ROOM_TYPE_PHOTOS: Record<string, readonly RoomPhoto[]> = {
       src: "/joyb_images/deluxe-5.jpg",
       alt: "Crisp white pillows with a printed kanga cushion against a soft grey headboard",
     },
+    {
+      src: "/joyb_images/deluxe-bright.jpg",
+      alt: "Bright deluxe room with a wide bed and woven wall decor",
+    },
+    {
+      src: "/joyb_images/deluxe-corner.jpg",
+      alt: "Deluxe room photographed from its seating area",
+    },
+    {
+      src: "/joyb_images/decorated-room.jpg",
+      alt: "Guest room prepared with folded towels and flower petals",
+    },
   ],
   twin: [
     {
@@ -182,6 +194,10 @@ const ROOM_TYPE_PHOTOS: Record<string, readonly RoomPhoto[]> = {
       src: "/joyb_images/twin-3.jpg",
       alt: "Corner of the twin room with a kettle, cups, bottled water and a mini fridge",
     },
+    {
+      src: "/joyb_images/decorated-room.jpg",
+      alt: "JoyB guest room prepared with folded towels and flower petals",
+    },
   ],
   double: [
     {
@@ -195,6 +211,10 @@ const ROOM_TYPE_PHOTOS: Record<string, readonly RoomPhoto[]> = {
     {
       src: "/joyb_images/double-3.jpg",
       alt: "Foot of the bed beside the tea tray, bottled water and mini fridge",
+    },
+    {
+      src: "/joyb_images/decorated-room.jpg",
+      alt: "JoyB guest room prepared with folded towels and flower petals",
     },
   ],
   interconnected: [
@@ -214,6 +234,10 @@ const ROOM_TYPE_PHOTOS: Record<string, readonly RoomPhoto[]> = {
       src: "/joyb_images/connecting-4.jpg",
       alt: "Wardrobe alcove with hanging space, a safe box and a full length mirror",
     },
+    {
+      src: "/joyb_images/decorated-room.jpg",
+      alt: "JoyB guest room prepared with folded towels and flower petals",
+    },
   ],
   // No photos of this type yet, so it borrows the two beds it actually has.
   "double/single": [
@@ -224,6 +248,10 @@ const ROOM_TYPE_PHOTOS: Record<string, readonly RoomPhoto[]> = {
     {
       src: "/joyb_images/twin-3.jpg",
       alt: "Single bed beside the tea tray, bottled water and mini fridge",
+    },
+    {
+      src: "/joyb_images/decorated-room.jpg",
+      alt: "JoyB guest room prepared with folded towels and flower petals",
     },
   ],
 };

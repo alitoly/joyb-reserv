@@ -11,7 +11,7 @@ import {
 } from "@/components/room-booking-form";
 import { Reveal } from "@/components/reveal";
 import { PhotoGrid } from "@/components/photo-grid";
-import { Kicker, Section } from "@/components/ui";
+import { Section } from "@/components/ui";
 import { CheckIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
@@ -31,6 +31,17 @@ export async function generateMetadata({
     description:
       room.description ??
       `Book the ${room.name} at JoyB Resort Zanzibar from $${room.priceUsd} per night.`,
+    openGraph: {
+      title: `${room.name} · JoyB Resort`,
+      description: room.description ?? `Stay in the ${room.name} at JoyB Resort Zanzibar.`,
+      images: [{ url: room.imageUrl, alt: room.imageAlt }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${room.name} · JoyB Resort`,
+      description: room.description ?? `Stay in the ${room.name} at JoyB Resort Zanzibar.`,
+      images: [room.imageUrl],
+    },
   };
 }
 
@@ -76,7 +87,7 @@ export default async function RoomDetailsPage({
     (roomPhotos.length - 1) % 3 === 0 ? "sm:grid-cols-3" : "sm:grid-cols-2";
 
   return (
-    <Section className="py-12 sm:py-16" width="wide">
+    <Section className="py-10 sm:py-16" width="wide">
       <Reveal>
         <Link
           href="/rooms"
@@ -86,35 +97,38 @@ export default async function RoomDetailsPage({
         </Link>
       </Reveal>
 
-      <div className="mt-6 grid gap-10 lg:grid-cols-[1.4fr_1fr] lg:gap-14">
+      <Reveal className="mt-8 grid gap-7 border-t border-charcoal/20 pt-7 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div>
+          <h1 className="mt-4 text-[clamp(3.8rem,8vw,7.5rem)] leading-[0.86] text-charcoal">{room.name}</h1>
+        </div>
+        <div className="lg:text-right">
+          <p className="text-sm text-ink-soft">From</p>
+          <p className="font-display text-5xl leading-none text-charcoal">${room.priceUsd}<span className="font-sans text-sm text-ink-soft"> / night</span></p>
+        </div>
+      </Reveal>
+
+      <div className="mt-10 grid gap-14 lg:grid-cols-[1.35fr_0.85fr] lg:gap-16">
         {/* Left: gallery + details */}
         <div>
           <Reveal>
-            <Kicker>Room type</Kicker>
-            <h1 className="mt-3 text-[clamp(2rem,4vw,3.25rem)] leading-[1.05] text-charcoal">
-              {room.name}
-            </h1>
-            <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-ink-soft">
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 border-y border-charcoal/12 py-4 text-sm text-ink-soft">
               {room.capacity && <span>Sleeps {room.capacity}</span>}
               {room.capacity && <span aria-hidden="true">·</span>}
               <span>
                 {room.totalRooms} {room.totalRooms === 1 ? "room" : "rooms"} of this type
               </span>
               <span aria-hidden="true">·</span>
-              <span className="text-charcoal">
-                <span className="font-display text-xl">${room.priceUsd}</span> /
-                night
-              </span>
+              <span>Private bathroom</span>
             </p>
           </Reveal>
 
           {/* One grid, so the viewer's next/previous walks the whole room. The
               lead shot spans the full width; the rest fill complete rows. */}
-          <Reveal delay={80} className="mt-7">
+          <Reveal delay={80} className="mt-5">
             <PhotoGrid
               photos={roomPhotos.map((photo, i) =>
                 i === 0
-                  ? { ...photo, className: "col-span-full aspect-[16/10]" }
+                  ? { ...photo, className: "col-span-full aspect-[4/3] lg:aspect-[16/10]" }
                   : photo,
               )}
               className={`grid grid-cols-2 gap-3 ${viewCols}`}
@@ -124,14 +138,10 @@ export default async function RoomDetailsPage({
           </Reveal>
 
           {/* Every room has its own bathroom, and they share this design */}
-          <Reveal delay={100} className="mt-10">
-            <h2 className="font-display text-2xl text-charcoal">
+          <Reveal delay={100} className="mt-14 border-t border-charcoal/15 pt-8">
+            <h2 className="font-display text-4xl text-charcoal">
               Your private bathroom
             </h2>
-            <p className="mt-2 max-w-2xl leading-relaxed text-ink-soft">
-              Every room has its own bathroom with a rain shower, hot water, and
-              fresh towels and toiletries waiting for you.
-            </p>
             <PhotoGrid
               photos={BATHROOM_PHOTOS}
               className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3"
@@ -141,8 +151,8 @@ export default async function RoomDetailsPage({
 
           {/* Description */}
           {room.description && (
-            <Reveal delay={120} className="mt-10">
-              <h2 className="font-display text-2xl text-charcoal">
+            <Reveal delay={120} className="mt-14 border-t border-charcoal/15 pt-8">
+              <h2 className="font-display text-4xl text-charcoal">
                 About this room
               </h2>
               <p className="mt-3 max-w-2xl leading-relaxed text-ink-soft">
@@ -152,8 +162,8 @@ export default async function RoomDetailsPage({
           )}
 
           {/* Facilities */}
-          <Reveal delay={160} className="mt-10">
-            <h2 className="font-display text-2xl text-charcoal">Facilities</h2>
+          <Reveal delay={160} className="mt-14 border-t border-charcoal/15 pt-8">
+            <h2 className="font-display text-4xl text-charcoal">Facilities</h2>
             <ul className="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
               {facilities.map((item) => (
                 <li
@@ -171,10 +181,10 @@ export default async function RoomDetailsPage({
         </div>
 
         {/* Right: booking form (sticky on large screens) */}
-        <div className="lg:sticky lg:top-28 lg:self-start">
+        <div className="lg:sticky lg:top-24 lg:self-start">
           <Reveal delay={100}>
-            <h2 className="mb-4 font-display text-2xl text-charcoal">
-              Book this room type
+            <h2 className="mb-5 font-display text-4xl text-charcoal">
+              Plan your stay
             </h2>
             <RoomBookingForm room={room} defaultGuest={defaultGuest} />
           </Reveal>

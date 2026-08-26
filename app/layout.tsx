@@ -1,26 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Outfit, Mulish } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-
-// Variable font: no `weight` here, so the whole 100-900 axis is available and
-// the display type can actually go bold.
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const mulish = Mulish({
-  variable: "--font-mulish",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-});
+import { MotionProvider } from "@/components/motion-provider";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.joybresort.com"),
   title: {
     default: "JoyB Resort · Quiet garden retreat in Zanzibar",
     template: "%s · JoyB Resort",
@@ -36,10 +22,24 @@ export const metadata: Metadata = {
     "near Zanzibar airport",
     "Tanzania",
   ],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "JoyB Resort",
+    title: "JoyB Resort · A garden retreat in Zanzibar",
+    description: "Seventeen comfortable rooms, a pool beneath the palms, and warm hospitality in Zanzibar.",
+    images: [{ url: "/joyb_images/resort-twilight.jpg", width: 2560, height: 1707, alt: "JoyB Resort at twilight" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "JoyB Resort · A garden retreat in Zanzibar",
+    description: "Seventeen comfortable rooms, a pool beneath the palms, and warm hospitality in Zanzibar.",
+    images: ["/joyb_images/resort-twilight.jpg"],
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#3f6f35",
+  themeColor: "#142d28",
   width: "device-width",
   initialScale: 1,
 };
@@ -50,10 +50,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${outfit.variable} ${mulish.variable} h-full`}
-    >
+    <html lang="en" className="h-full">
       <body className="min-h-full bg-sand text-ink flex flex-col">
         <a
           href="#main"
@@ -61,11 +58,13 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <SiteHeader />
-        <main id="main" className="flex-1">
-          {children}
-        </main>
-        <SiteFooter />
+        <MotionProvider>
+          <SiteHeader />
+          <main id="main" className="flex-1">
+            {children}
+          </main>
+          <SiteFooter />
+        </MotionProvider>
         <Analytics />
       </body>
     </html>

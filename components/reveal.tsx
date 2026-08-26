@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /**
  * Scroll-reveal wrapper. Content is visible by default (CSS handles the hidden
@@ -20,39 +25,29 @@ export function Reveal({
   className?: string;
 }) {
   const ref = useRef<HTMLElement | null>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
+  useGSAP(() => {
     const el = ref.current;
     if (!el) return;
-    const reduce = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    // Under reduced motion the CSS keeps `.reveal` fully visible, so there's
-    // nothing to observe or toggle.
-    if (reduce) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            observer.unobserve(entry.target);
-          }
-        });
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    gsap.fromTo(
+      el,
+      { autoAlpha: 0, y: 30 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        duration: 1,
+        delay: delay / 1000,
+        ease: "power3.out",
+        scrollTrigger: { trigger: el, start: "top 88%", once: true },
       },
-      { threshold: 0.15, rootMargin: "0px 0px -10% 0px" },
     );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  }, { dependencies: [delay], scope: ref, revertOnUpdate: true });
 
   return (
     <Tag
       // @ts-expect-error — ref type is the union of the allowed tags
       ref={ref}
-      className={`reveal ${className}`}
-      data-visible={visible}
-      style={{ ["--reveal-delay" as string]: `${delay}ms` }}
+      className={className}
     >
       {children}
     </Tag>
