@@ -38,7 +38,7 @@ const DETAILS = [
 export default function ContactPage() {
   return (
     <>
-      <PageHero image="/joyb_images/juice-point-courtyard.jpg" alt="JoyB Resort courtyard and fresh juice point" title={<>Let&apos;s plan<br /><em className="display-accent">your stay.</em></>} priority />
+      <PageHero image="/joyb_images/juice-point-courtyard.jpg" alt="JoyB Resort courtyard and fresh juice point" title={<>Contact<br /><em className="display-accent">JoyB Resort.</em></>} priority />
 
       <Section className="py-20 sm:py-28" width="wide">
         <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-20">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "./logo";
@@ -108,36 +109,52 @@ export function SiteHeader() {
             {authLink.label}
           </Link>
           <Link href="/book" className={`editorial-link ${overHero ? "text-white" : "text-charcoal"}`}>Book your stay <span className="ml-2 text-rust">↗</span></Link>
+          <Image
+            src="/joyb-logo.png"
+            alt="JoyB Resort"
+            width={64}
+            height={51}
+            className={`h-10 w-auto object-contain ${overHero ? "drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)]" : ""}`}
+          />
         </div>
 
-        <button
-          type="button"
-          className={`ml-auto inline-flex h-11 w-11 items-center justify-center md:hidden cursor-pointer ${
-            overHero ? "text-white" : "text-charcoal"
-          }`}
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          aria-label={open ? "Close menu" : "Open menu"}
-          onClick={() => setOpen((v) => !v)}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            {open ? (
-              <path
-                d="M6 6l12 12M18 6L6 18"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            ) : (
-              <path
-                d="M4 7h16M4 12h16M4 17h16"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            )}
-          </svg>
-        </button>
+        <div className="ml-auto flex items-center gap-3 md:hidden">
+          <Image
+            src="/joyb-logo.png"
+            alt="JoyB Resort"
+            width={64}
+            height={51}
+            className={`h-9 w-auto object-contain ${overHero ? "drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)]" : ""}`}
+          />
+          <button
+            type="button"
+            className={`inline-flex h-11 w-11 items-center justify-center cursor-pointer ${
+              overHero ? "text-white" : "text-charcoal"
+            }`}
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            aria-label={open ? "Close menu" : "Open menu"}
+            onClick={() => setOpen((v) => !v)}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              {open ? (
+                <path
+                  d="M6 6l12 12M18 6L6 18"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              ) : (
+                <path
+                  d="M4 7h16M4 12h16M4 17h16"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
 
       {open && (

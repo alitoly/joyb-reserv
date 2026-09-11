@@ -11,17 +11,6 @@ type Filter = "All" | GalleryCategory;
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const TILE_PATTERNS = [
-  "col-span-2 aspect-[4/5] md:col-span-7 md:aspect-[16/10]",
-  "col-span-1 aspect-[3/4] self-end md:col-span-3 md:mt-28",
-  "col-span-1 aspect-square md:col-span-2 md:mt-10 md:aspect-[4/5]",
-  "col-span-2 aspect-[5/4] md:col-span-4",
-  "col-span-1 aspect-[3/4] md:col-span-3 md:mt-20",
-  "col-span-1 aspect-[4/5] md:col-span-5",
-  "col-span-2 aspect-[16/10] md:col-span-8",
-  "col-span-2 aspect-[4/3] md:col-span-4 md:mt-28",
-] as const;
-
 export function GalleryExperience({ images }: { images: readonly GalleryImage[] }) {
   const [filter, setFilter] = useState<Filter>("All");
   const root = useRef<HTMLDivElement>(null);
@@ -67,14 +56,16 @@ export function GalleryExperience({ images }: { images: readonly GalleryImage[] 
       <p className="sr-only" aria-live="polite">Showing {filter.toLowerCase()} photographs</p>
       <PhotoGrid
         key={filter}
-        photos={filtered.map((photo, index) => ({
+        masonry
+        photos={filtered.map((photo) => ({
           src: photo.src,
           alt: photo.alt,
           caption: photo.caption,
-          className: TILE_PATTERNS[index % TILE_PATTERNS.length],
+          width: photo.width,
+          height: photo.height,
         }))}
-        className="mt-16 grid grid-cols-2 gap-x-3 gap-y-16 md:grid-cols-12 md:gap-x-5 md:gap-y-28"
-        sizes="(max-width: 768px) 50vw, 34vw"
+        className="mt-16 columns-2 gap-3 sm:columns-3 lg:columns-4"
+        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 34vw, 25vw"
         priorityFirst
       />
     </div>

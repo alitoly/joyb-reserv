@@ -9,6 +9,9 @@ export interface GalleryPhoto {
   caption?: string;
   /** Extra grid classes for this tile (column span, aspect override). */
   className?: string;
+  /** Intrinsic size, required for `masonry` mode so tiles pack at their own aspect ratio. */
+  width?: number;
+  height?: number;
 }
 
 /**
@@ -24,12 +27,15 @@ export function PhotoGrid({
   tileClassName = "aspect-[4/3]",
   sizes = "(max-width: 640px) 50vw, 33vw",
   priorityFirst = false,
+  masonry = false,
 }: {
   photos: readonly GalleryPhoto[];
   className?: string;
   tileClassName?: string;
   sizes?: string;
   priorityFirst?: boolean;
+  /** Pack tiles at their own aspect ratio in CSS columns instead of a fixed-height grid, so there's no leftover space under a shorter tile. Photos need `width`/`height`. */
+  masonry?: boolean;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [index, setIndex] = useState(0);
@@ -71,34 +77,64 @@ export function PhotoGrid({
   return (
     <>
       <ul className={className}>
-        {photos.map((photo, i) => (
-          <li
-            key={photo.src}
-            data-gallery-tile
-            className={`relative overflow-hidden bg-sand-deep ${photo.className ?? tileClassName}`}
-          >
-            <button
-              type="button"
-              onClick={() => open(i)}
-              aria-label={`View larger: ${photo.alt}`}
-              className="group absolute inset-0 cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"
+        {photos.map((photo, i) =>
+          masonry ? (
+            <li
+              key={photo.src}
+              data-gallery-tile
+              className="relative mb-3 break-inside-avoid overflow-hidden bg-sand-deep md:mb-4"
             >
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                fill
-                priority={priorityFirst && i === 0}
-                sizes={sizes}
-                className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
-              />
-            </button>
-            {photo.caption && (
-              <p className="pointer-events-none absolute right-0 bottom-0 left-0 z-10 bg-gradient-to-t from-charcoal/85 to-transparent px-4 pt-12 pb-4 text-xs font-medium tracking-wide text-white">
-                {photo.caption}
-              </p>
-            )}
-          </li>
-        ))}
+              <button
+                type="button"
+                onClick={() => open(i)}
+                aria-label={`View larger: ${photo.alt}`}
+                className="group block w-full cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"
+              >
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  width={photo.width ?? 1600}
+                  height={photo.height ?? 1200}
+                  priority={priorityFirst && i === 0}
+                  sizes={sizes}
+                  className="block h-auto w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+                />
+              </button>
+              {photo.caption && (
+                <p className="pointer-events-none absolute right-0 bottom-0 left-0 z-10 bg-gradient-to-t from-charcoal/85 to-transparent px-4 pt-12 pb-4 text-xs font-medium tracking-wide text-white">
+                  {photo.caption}
+                </p>
+              )}
+            </li>
+          ) : (
+            <li
+              key={photo.src}
+              data-gallery-tile
+              className={`relative overflow-hidden bg-sand-deep ${photo.className ?? tileClassName}`}
+            >
+              <button
+                type="button"
+                onClick={() => open(i)}
+                aria-label={`View larger: ${photo.alt}`}
+                className="group absolute inset-0 cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"
+              >
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  priority={priorityFirst && i === 0}
+                  sizes={sizes}
+                  className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+                />
+              </button>
+              {photo.caption && (
+                <p className="pointer-events-none absolute right-0 bottom-0 left-0 z-10 bg-gradient-to-t from-charcoal/85 to-transparent px-4 pt-12 pb-4 text-xs font-medium tracking-wide text-white">
+                  {photo.caption}
+                </p>
+              )}
+            </li>
+          ),
+        )}
       </ul>
 
       <dialog

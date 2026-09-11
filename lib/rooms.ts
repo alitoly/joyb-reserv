@@ -144,6 +144,10 @@ export const BATHROOM_PHOTOS: readonly RoomPhoto[] = [
     src: "/joyb_images/bathroom-amenities.jpg",
     alt: "Mirrored bathroom cabinet stocked with shampoo, conditioner and soap",
   },
+  {
+    src: "/joyb_images/bathroom (2).JPG",
+    alt: "Full bathroom with toilet, vanity sink and mirrored cabinet against ochre plaster walls",
+  },
 ];
 
 const ROOM_TYPE_PHOTOS: Record<string, readonly RoomPhoto[]> = {
@@ -180,6 +184,10 @@ const ROOM_TYPE_PHOTOS: Record<string, readonly RoomPhoto[]> = {
       src: "/joyb_images/decorated-room.jpg",
       alt: "Guest room prepared with folded towels and flower petals",
     },
+    {
+      src: "/joyb_images/delux (2).JPG",
+      alt: "Deluxe room entrance with a wardrobe, armchair and glass doors onto the terrace",
+    },
   ],
   twin: [
     {
@@ -198,6 +206,18 @@ const ROOM_TYPE_PHOTOS: Record<string, readonly RoomPhoto[]> = {
       src: "/joyb_images/decorated-room.jpg",
       alt: "JoyB guest room prepared with folded towels and flower petals",
     },
+    {
+      src: "/joyb_images/twin (2).JPG",
+      alt: "Twin room with matching towel swans and woven wall discs above each bed",
+    },
+    {
+      src: "/joyb_images/twin room.JPG",
+      alt: "Twin room seen from the doorway, Moshi name plate and do-not-disturb sign on the door",
+    },
+    {
+      src: "/joyb_images/WhatsApp Image 2026-08-22 at 3.47.13 PM (1).jpeg",
+      alt: "Twin room with two beds facing each other and a bedside table between them",
+    },
   ],
   double: [
     {
@@ -215,6 +235,10 @@ const ROOM_TYPE_PHOTOS: Record<string, readonly RoomPhoto[]> = {
     {
       src: "/joyb_images/decorated-room.jpg",
       alt: "JoyB guest room prepared with folded towels and flower petals",
+    },
+    {
+      src: "/joyb_images/double (2).JPG",
+      alt: "Double room named Arusha, seen through the open doorway with a do-not-disturb sign",
     },
   ],
   interconnected: [
@@ -237,6 +261,14 @@ const ROOM_TYPE_PHOTOS: Record<string, readonly RoomPhoto[]> = {
     {
       src: "/joyb_images/decorated-room.jpg",
       alt: "JoyB guest room prepared with folded towels and flower petals",
+    },
+    {
+      src: "/joyb_images/connecting (2).JPG",
+      alt: "Interconnected bedroom with a Stone Town street painting and a woven wall hanging",
+    },
+    {
+      src: "/joyb_images/WhatsApp Image 2026-08-22 at 3.47.08 PM.jpeg",
+      alt: "Bed turned down with a Karibu JoyB welcome message beneath a Stone Town waterfront painting",
     },
   ],
   // No photos of this type yet, so it borrows the two beds it actually has.

@@ -15,7 +15,7 @@ export default function GalleryPage() {
         <Image src="/joyb_images/resort-twilight.jpg" alt="JoyB Resort pool and gardens at twilight" fill priority sizes="100vw" className="-z-10 object-cover" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-charcoal/30 via-transparent to-charcoal/80" />
         <div className="mx-auto w-full max-w-[100rem] px-5 pb-14 sm:px-8 sm:pb-20">
-          <h1 className="max-w-6xl text-[clamp(5rem,14vw,13rem)] leading-[0.7] text-white">Collected<br /><em className="display-accent ml-[14vw]">light.</em></h1>
+          <h1 className="max-w-6xl text-[clamp(5rem,14vw,13rem)] leading-[0.7] text-white">A look inside<br /><em className="display-accent ml-[14vw]">JoyB Resort.</em></h1>
         </div>
       </section>
       <section className="bg-surface px-5 py-16 sm:px-8 sm:py-24">

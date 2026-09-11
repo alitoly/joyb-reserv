@@ -21,7 +21,7 @@ export default async function RoomsPage() {
 
   return (
     <>
-      <PageHero image="/joyb_images/deluxe-bright.jpg" alt="A bright guest room at JoyB Resort" title={<>Rooms made for<br /><em className="display-accent">slow mornings.</em></>} priority />
+      <PageHero image="/joyb_images/deluxe-bright.jpg" alt="A bright guest room at JoyB Resort" title={<>Rooms and<br /><em className="display-accent">accommodation.</em></>} priority />
 
       <Section className="py-16 sm:py-24" width="wide">
         <PhotoGrid

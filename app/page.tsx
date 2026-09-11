@@ -23,7 +23,7 @@ export default function HomePage() {
         <div className="w-full px-5 pb-10 sm:px-8 sm:pb-14">
           <p className="editorial-label mb-8 text-white/90">Zanzibar · Tanzania</p>
           <h1 className="display-xl max-w-[95rem] text-[clamp(5.2rem,16.5vw,16rem)] text-white">
-            Stay close<br /><em className="display-accent ml-[12vw]">to nature.</em>
+            Welcome to<br /><em className="display-accent ml-[12vw]">JoyB Resort.</em>
           </h1>
         </div>
         <div className="absolute right-5 bottom-12 hidden items-center gap-4 editorial-label text-white md:flex [writing-mode:vertical-rl]">
@@ -46,7 +46,7 @@ export default function HomePage() {
             <Kicker>Life at JoyB</Kicker>
             <Link href="/gallery" className="editorial-link text-sand">Open gallery <span className="ml-2 text-rust">↗</span></Link>
           </div>
-          <Reveal><h2 className="mt-20 max-w-5xl text-[clamp(4rem,8vw,8rem)] leading-[0.82] text-sand">Let the day find <em className="display-accent">its own pace.</em></h2></Reveal>
+          <Reveal><h2 className="mt-20 max-w-5xl text-[clamp(4rem,8vw,8rem)] leading-[0.82] text-sand">Life at <em className="display-accent">JoyB Resort.</em></h2></Reveal>
           <div className="mt-20 grid items-start gap-12 lg:grid-cols-[0.9fr_1.25fr_0.8fr] lg:gap-7">
             {EXPERIENCES.map((item, index) => (
               <Reveal key={item.title} delay={index * 90}>
@@ -66,7 +66,7 @@ export default function HomePage() {
       <section className="overflow-hidden bg-surface py-20 sm:py-28">
         <div className="mx-auto max-w-[100rem] px-5 sm:px-8">
           <Reveal className="flex flex-col gap-8 border-t border-charcoal/45 pt-4 sm:flex-row sm:items-end sm:justify-between">
-            <div><Kicker>Seen at JoyB</Kicker><h2 className="mt-16 text-[clamp(4rem,8vw,8rem)] leading-[0.82] text-charcoal">The island mood,<br /><em className="display-accent">moving with you.</em></h2></div>
+            <div><Kicker>Seen at JoyB</Kicker><h2 className="mt-16 text-[clamp(4rem,8vw,8rem)] leading-[0.82] text-charcoal">A closer look<br /><em className="display-accent">at the resort.</em></h2></div>
             <Link href="/gallery" className="editorial-link text-charcoal">Open gallery <span className="ml-2 text-rust">↗</span></Link>
           </Reveal>
         </div>
@@ -77,7 +77,7 @@ export default function HomePage() {
         <Reveal className="relative min-h-[68svh] overflow-hidden"><Image src="/joyb_images/resort-twilight.jpg" alt="JoyB Resort pool and garden at twilight" fill sizes="(max-width: 1024px) 100vw, 62vw" className="object-cover" /></Reveal>
         <Reveal className="flex flex-col justify-center px-6 py-20 sm:px-12 lg:px-[7vw]">
           <Kicker>A slower rhythm</Kicker>
-          <h2 className="mt-16 text-[clamp(4.2rem,7vw,7rem)] leading-[0.82] text-charcoal">Come home<br />to the <em className="display-accent">garden.</em></h2>
+          <h2 className="mt-16 text-[clamp(4.2rem,7vw,7rem)] leading-[0.82] text-charcoal">Your stay<br />at <em className="display-accent">JoyB Resort.</em></h2>
           <Link href="/rooms" className="editorial-link mt-14 text-charcoal">Find your room <span className="ml-2 text-rust">↗</span></Link>
         </Reveal>
       </section>

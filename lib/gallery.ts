@@ -90,6 +90,23 @@ export const GALLERY_IMAGES: readonly GalleryImage[] = [
   image("connecting-2.jpg", 2560, 1707, "Rooms", "Private and connected", "Bedroom with its private bathroom door open"),
   image("connecting-3.jpg", 2560, 1707, "Rooms", "Island artwork", "Framed Stone Town waterfront painting in a guest room"),
   image("connecting-4.jpg", 2560, 1707, "Rooms", "Storage and space", "Wardrobe alcove with a safe and full-length mirror"),
+  image("0F1A1570.JPG", 2560, 1707, "Pool", "Poolside fountain", "Pool with a wall fountain, sun loungers and garden rooms beyond"),
+  image("0F1A1538.JPG", 2560, 1707, "Gardens", "A tyre swing in the shade", "Tyre swing bench under a shade sail, dining tables set beneath the trees"),
+  image("0F1A1650.JPG", 2560, 1707, "Night", "Blue-lit fountain", "Pool and wall fountain lit blue at dusk, garden rooms glowing behind"),
+  image("night.JPG", 2560, 1707, "Night", "Evening at JoyB", "Resort courtyard and pool glowing under string lights after dark"),
+  image("night (2).JPG", 2560, 1617, "Night", "Courtyard by night", "Garden courtyard lit warmly at night, seating arranged beneath the trees"),
+  image("night (3).jpg", 2560, 1920, "Night", "Poolside sunset", "Sun loungers with rolled towels facing the pool as the sky turns gold"),
+  image("hero.jpg", 2560, 1920, "Dining", "Under the pergola", "Restaurant pergola and pool lit warmly as evening falls"),
+  image("IMG_5852.JPG", 1920, 2560, "Dining", "Dinner in the courtyard", "Tables set for dinner in the garden courtyard after dark"),
+  image("DSCF0532.jpg", 2560, 1707, "Dining", "Fresh from the kitchen", "Buffet spread of grilled meats, salads and sides set out for guests"),
+  image("DSCF0686.jpg", 2560, 1707, "Night", "Pool after hours", "Empty pool and garden rooms lit blue and gold after dark"),
+  image("WhatsApp Image 2026-08-22 at 3.47.06 PM (2).jpeg", 1600, 1200, "Pool", "A sunken lounge", "Sunken cushioned lounge with steps down beside the pool at sunrise"),
+  image("WhatsApp Image 2026-08-22 at 3.47.10 PM (1).jpeg", 1600, 1200, "Pool", "Morning at the pool", "Pool and garden rooms in early morning light, lifebuoy on the pool wall"),
+  image("WhatsApp Image 2026-08-22 at 3.47.19 PM (2).jpeg", 1600, 1200, "Dining", "Fresh Juice Point", "Aerial view of the Fresh Juice Point stand beside a tyre swing and loungers"),
+  image("WhatsApp Image 2026-08-22 at 3.47.19 PM (3).jpeg", 1600, 1200, "Night", "Blue pool at night", "Pool lit blue at night beside the illuminated garden rooms"),
+  image("WhatsApp Image 2026-08-22 at 3.47.20 PM.jpeg", 1600, 900, "Night", "Colour after dark", "Pool lit in red and blue at night, reflecting the room doors beyond"),
+  image("WhatsApp Image 2026-08-22 at 3.47.08 PM (2).jpeg", 1600, 1200, "Rooms", "Wardrobe and safe", "Open-frame wardrobe with hanging space and an in-room safe"),
+  image("WhatsApp Image 2026-08-22 at 3.47.14 PM (1).jpeg", 1600, 1200, "Rooms", "In-room amenities", "Kettle, teacups and bottled water set out on a guest room tray"),
 ];
 
 export const FEATURED_GALLERY_IMAGES = GALLERY_IMAGES.filter((item) => item.featured);

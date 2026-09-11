@@ -23,7 +23,7 @@ const VALUES = [
 export default function AboutPage() {
   return (
     <>
-      <PageHero image={aboutImg} alt="Coral stone room fronts shaded by old mango trees" title={<>A garden guesthouse,<br /><em className="display-accent">grown with care.</em></>} priority />
+      <PageHero image={aboutImg} alt="Coral stone room fronts shaded by old mango trees" title={<>The story of<br /><em className="display-accent">JoyB Resort.</em></>} priority />
 
       <Section className="py-20 sm:py-32" width="wide">
         <Reveal>
